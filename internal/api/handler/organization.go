@@ -50,7 +50,7 @@ func GetOrganizationList(context *fiber.Ctx) error {
 // @Produce 	json
 // @Param 		name query string false "Organization Name" @in query
 // @Param 		id query string false "Organization ID" @in query
-// @Success 	200 {object} models.OrganizationDetails "Successful Response"
+// @Success 	200 {object} models.OrganizationResponse "Successful Response"
 // @Failure 	404 {object} models.APIError "Organization Not Found"
 // @Failure 	500 {object} models.APIError "Internal Server Error"
 // @Router 		/organizations/profile [get]
@@ -81,7 +81,7 @@ func GetOrganizationProfile(context *fiber.Ctx) error {
 		})
 	}
 
-	detailsInJson, err := json.Marshal(organizationDetails)
+	detailsInJson, err := json.Marshal(organization.Clean(&organizationDetails))
 	if err != nil {
 		return context.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Error:   fiber.ErrInternalServerError.Error(),

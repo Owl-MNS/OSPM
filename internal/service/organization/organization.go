@@ -132,3 +132,29 @@ func DetailsCheck(newOrganization *models.Organization) error {
 	}
 	return nil
 }
+
+func Clean(organization *models.Organization) models.OrganizationResponse {
+	return models.OrganizationResponse{
+		ID:                       organization.ID,
+		Balance:                  organization.Balance,
+		AllowNagativeBalance:     organization.AllowNagativeBalance,
+		NegativeBalanceThreshold: organization.NegativeBalanceThreshold,
+		Details: models.OrganizationDetailsResponse{
+			Name:    organization.Details.Name,
+			Address: organization.Details.Address,
+			Email:   organization.Details.Email,
+			Mobile:  organization.Details.Mobile,
+			Phone:   organization.Details.Phone,
+		},
+		Owner: models.OrganizationOwnerResponse{
+			Type:            organization.Owner.Type,
+			Name:            organization.Owner.Name,
+			Address:         organization.Owner.Address,
+			Email:           organization.Owner.Email,
+			Mobile:          organization.Owner.Mobile,
+			Phone:           organization.Owner.Phone,
+			LegalNationalID: organization.Owner.LegalNationalID,
+		},
+	}
+
+}
