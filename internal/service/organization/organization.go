@@ -87,42 +87,58 @@ func DetailsCheck(newOrganization *models.Organization) error {
 	var err error
 
 	if newOrganization.Balance != 0 {
-		errorMessage := fmt.Sprintf("organization balance can not accept any values but 0 while creating the organization. given value is: %f", newOrganization.Balance)
+		errorMessage := fmt.Sprintf(
+			"organization balance can not accept any values but 0 while creating the organization. given value is: %f",
+			newOrganization.Balance)
 		err = errors.New(errorMessage)
 	}
 
 	if newOrganization.AllowNagativeBalance {
-		errorMessage := fmt.Sprintf("organization AllowNagativeBalance can not be true while creating the organization. given value is: %v", newOrganization.AllowNagativeBalance)
+		errorMessage := fmt.Sprintf(
+			"organization AllowNagativeBalance can not be true while creating the organization. given value is: %v",
+			newOrganization.AllowNagativeBalance)
 		err = errors.New(errorMessage)
 	}
 
 	if newOrganization.NegativeBalanceThreshold != 0 {
-		errorMessage := fmt.Sprintf("organization NegativeBalanceThreshold can not accept any values but 0 while creating the organization. given value is: %f", newOrganization.NegativeBalanceThreshold)
+		errorMessage := fmt.Sprintf(
+			"organization NegativeBalanceThreshold can not accept any values but 0 while creating the organization. given value is: %f",
+			newOrganization.NegativeBalanceThreshold)
 		err = errors.New(errorMessage)
 	}
 
 	if newOrganization.Details.Name == "" {
-		errorMessage := fmt.Sprintf("organization Name can not be empty while creating the organization. given value is: %s", newOrganization.Details.Name)
+		errorMessage := fmt.Sprintf(
+			"organization Name can not be empty while creating the organization. given value is: %s",
+			newOrganization.Details.Name)
 		err = errors.New(errorMessage)
 	}
 
 	if newOrganization.Owner.Email == "" {
-		errorMessage := fmt.Sprintf("organization's Owner email address can not be empty while creating the organization. given value is: %s", newOrganization.Owner.Email)
+		errorMessage := fmt.Sprintf(
+			"organization's Owner email address can not be empty while creating the organization. given value is: %s",
+			newOrganization.Owner.Email)
 		err = errors.New(errorMessage)
 	}
 
 	if newOrganization.Owner.Mobile == "" {
-		errorMessage := fmt.Sprintf("organization's Owner Mobile can not be empty while creating the organization. given value is: %s", newOrganization.Owner.Mobile)
+		errorMessage := fmt.Sprintf(
+			"organization's Owner Mobile can not be empty while creating the organization. given value is: %s",
+			newOrganization.Owner.Mobile)
 		err = errors.New(errorMessage)
 	}
 
 	if !(newOrganization.Owner.Type == "legal" || newOrganization.Owner.Type == "individual") {
-		errorMessage := fmt.Sprintf("organization's Owner typ should be either individual or legal while creating the organization. given value is: %s", newOrganization.Owner.Type)
+		errorMessage := fmt.Sprintf(
+			"organization's Owner typ should be either individual or legal while creating the organization. given value is: %s",
+			newOrganization.Owner.Type)
 		err = errors.New(errorMessage)
 	}
 
 	if newOrganization.Owner.LegalNationalID == "" {
-		errorMessage := fmt.Sprintf("organization's Owner Legal National ID can not be empty while creating the organization. given value is: %s", newOrganization.Owner.LegalNationalID)
+		errorMessage := fmt.Sprintf(
+			"organization's Owner Legal National ID can not be empty while creating the organization. given value is: %s",
+			newOrganization.Owner.LegalNationalID)
 		err = errors.New(errorMessage)
 	}
 
@@ -133,6 +149,8 @@ func DetailsCheck(newOrganization *models.Organization) error {
 	return nil
 }
 
+// Clean can be used to remove database related items from the results returned from the
+// DB query like created_at, deleted_at and etc.
 func Clean(organization *models.Organization) models.OrganizationResponse {
 	return models.OrganizationResponse{
 		ID:                       organization.ID,
