@@ -11,7 +11,7 @@ import (
 // List returns a list of organizations in shortened format
 func List() ([]models.OrganizationShortInfo, error) {
 	organizationList := []models.Organization{}
-	result := cockroachdb.DB.Find(&organizationList)
+	result := cockroachdb.DB.Preload("Details").Find(&organizationList)
 	if result.Error != nil {
 		errorMessage := fmt.Sprintf("failed to get list of organization, error: %s", result.Error)
 		OSPMLogger.Log.Errorln(errorMessage)
