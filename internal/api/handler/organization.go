@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"ospm/internal/models"
 	"ospm/internal/service/organization"
 
@@ -16,7 +17,7 @@ import (
 // @Failure 	500 {object} models.APIError "Internal Server Error"
 // @Router 		/organizations [get]
 func GetOrganizationList(context *fiber.Ctx) error {
-	organizationList, err := organization.GetOrganizationList()
+	organizationList, err := organization.List()
 	if err != nil {
 		return context.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Error:   fiber.ErrInternalServerError.Error(),
@@ -64,7 +65,7 @@ func GetOrganizationProfile(context *fiber.Ctx) error {
 		})
 	}
 
-	organizationDetails, err := organization.GetOrganizationDetails(organizationName, organizationID)
+	organizationDetails, err := organization.Details(organizationName, organizationID)
 	if err != nil {
 		status := fiber.StatusInternalServerError
 		message := fiber.ErrInternalServerError.Message
@@ -91,15 +92,38 @@ func GetOrganizationProfile(context *fiber.Ctx) error {
 	return context.Status(fiber.StatusOK).Send(detailsInJson)
 }
 
+// @Summary 	Add a new organization
+// @Description Adds a new organization to the system. The request body must contain the organization details.
+// @Tags 		Organizations
+// @Accept 		json
+// @Produce 	json
+// @Param 		body body models.Organization true "Organization details"
+// @Success 	201 {object} map[string]string "Organization successfully added"
+// @Failure 	400 {object} models.APIError "Bad Request"
+// @Failure 	500 {object} models.APIError "Internal Server Error"
+// @Router 		/organization [post]
 func AddNewOrganization(context *fiber.Ctx) error {
-	organizationDetails := models.Organization{}
-	err := context.BodyParser(&organizationDetails)
+	newOrganization := models.Organization{}
+	err := context.BodyParser(&newOrganization)
 	if err != nil {
 		return context.Status(fiber.StatusBadRequest).JSON(models.APIError{
 			Error:   fiber.ErrBadRequest.Error(),
-			Message: "failed to pars the provided information. error:" + err.Error(),
+			Message: "failed to pars the provided information, error:" + err.Error(),
 		})
 	}
 
-	return nil
+	newOrganizationID, err := organization.New(newOrganization)
+	if err != nil {
+		return context.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Error:   fiber.ErrInternalServerError.Error(),
+			Message: "failed to add new organization, error:" + err.Error(),
+		})
+	}
+
+	responseMessage := map[string]string{
+		"message":             fmt.Sprintf("organization %s successfulle added", newOrganization.Details.Name),
+		"new_organization_id": newOrganizationID,
+	}
+
+	return context.Status(201).JSON(responseMessage)
 }
