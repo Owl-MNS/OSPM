@@ -1,0 +1,22 @@
+version: '3.7'
+
+services:
+  cockroach-db:
+    image: docker.arvancloud.ir/cockroachdb/cockroach:latest
+    container_name: cockroach-db
+    hostname: cockroach-db
+    environment:
+      - COCKROACH_DATABASE=ospm
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    volumes:
+      - cockroach-db:/cockroach/cockroach-data
+    command: >
+      start-single-node
+      --insecure 
+      --http-addr=cockroach-db:8080
+
+volumes:
+  cockroach-db:
+

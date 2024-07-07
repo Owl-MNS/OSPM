@@ -1,0 +1,98 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "ospm",
+    "collectionId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+    "dateExported": "2024-07-06T22:07:04.865Z",
+    "version": "1.2",
+    "folders": [
+        {
+            "_id": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
+            "name": "organization",
+            "containerId": "",
+            "created": "2024-07-06T20:49:32.247Z",
+            "sortNum": 10000
+        }
+    ],
+    "requests": [
+        {
+            "_id": "cd29e27a-214a-4777-8d25-56f0d3679ac3",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
+            "name": "GetOrganizationList",
+            "url": "http://127.0.0.1:9898/organization",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2024-07-06T20:49:49.537Z",
+            "modified": "2024-07-06T20:52:38.862Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ]
+        },
+        {
+            "_id": "796adf99-7782-4fa8-951b-fa76c04f1b90",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
+            "name": "GetOrganizationWithName",
+            "url": "http://127.0.0.1:9898/organization/profile?name=sample",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2024-07-06T21:38:34.681Z",
+            "modified": "2024-07-06T21:38:59.923Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "name",
+                    "value": "sample",
+                    "isPath": false
+                }
+            ]
+        },
+        {
+            "_id": "acc2ac02-3d7e-4fe5-8b4b-c4395ef7922b",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
+            "name": "GetOrganizationWithID",
+            "url": "http://127.0.0.1:9898/organization/profile?id=ed83a2ba-c55c-4297-b2ac-df7b02abdd7a",
+            "method": "GET",
+            "sortNum": 40000,
+            "created": "2024-07-06T21:43:52.300Z",
+            "modified": "2024-07-06T21:49:15.355Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "id",
+                    "value": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a",
+                    "isPath": false
+                }
+            ]
+        },
+        {
+            "_id": "fd3bbbbf-288f-46e6-8238-b8d0cdac649a",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
+            "name": "GetOrganizationWithIDWithName",
+            "url": "http://127.0.0.1:9898/organization/profile?id=ed83a2ba-c55c-4297-b2ac-df7b02abdd7a&name=sample",
+            "method": "GET",
+            "sortNum": 50000,
+            "created": "2024-07-06T21:49:30.496Z",
+            "modified": "2024-07-06T21:49:58.641Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "id",
+                    "value": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a",
+                    "isPath": false
+                },
+                {
+                    "name": "name",
+                    "value": "sample",
+                    "isPath": false
+                }
+            ]
+        }
+    ],
+    "ref": "f_g7vHUfaOT0qRTulndPg1dhgRZRduLok2UaE-bnltaLwQR_Gp5MKyd96uM3VfvWp9Kzj5hzKuobrBTQuqSz5A"
+}

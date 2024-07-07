@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+  cockroach-db:
+    image: docker.arvancloud.ir/cockroachdb/cockroach:latest
+    container_name: cockroach-db
+    command: /cockroach/entrypoint.sh
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    volumes:
+      - ./certs/ca.crt:/cockroach/certs/ca.crt
+      - ./certs/node.crt:/cockroach/certs/node.crt
+      - ./certs/node.key:/cockroach/certs/node.key
+      - ./certs/client.root.key:/cockroach/certs/client.root.key
+      - ./certs/client.user1.key:/cockroach/certs/client.user1.key
+      - ./certs/client.root.crt:/cockroach/certs/client.root.crt
+      - ./certs/client.user1.crt:/cockroach/certs/client.user1.crt
+      - ./init-cockroach.sh:/docker-entrypoint-initdb.d/init-cockroach.sh
+      - ./entrypoint.sh:/cockroach/entrypoint.sh
+    environment:
+      - COCKROACH_USER=user1
+      - COCKROACH_PASSWORD=foobar
+      - COCKROACH_DATABASE=ospm
+      - HOST_IP=127.0.0.1
+    restart: unless-stopped
+    entrypoint: ["/cockroach/entrypoint.sh"]
+
+volumes:
+  cockroach-data:
