@@ -2,7 +2,7 @@
     "clientName": "Thunder Client",
     "collectionName": "ospm",
     "collectionId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
-    "dateExported": "2024-07-06T22:07:04.865Z",
+    "dateExported": "2024-07-07T22:13:53.281Z",
     "version": "1.2",
     "folders": [
         {
@@ -92,7 +92,29 @@
                     "isPath": false
                 }
             ]
+        },
+        {
+            "_id": "c030bbae-bea0-4f3c-98cb-f844edbaf236",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
+            "name": "AddNewOrganization",
+            "url": "http://127.0.0.1:9898/organization",
+            "method": "POST",
+            "sortNum": 60000,
+            "created": "2024-07-07T22:08:28.591Z",
+            "modified": "2024-07-07T22:12:04.530Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"organization_details\": {\n    \"name\": \"Sample Organization\",\n    \"address\": \"123 Sample Street\",\n    \"email\": \"info@sample.org\",\n    \"mobile\": \"1234567890\",\n    \"phone\": \"0987654321\"\n  },\n  \"organization_owner\": {\n    \"type\": \"legal\",\n    \"name\": \"Mahmoud Ahmadi\",\n    \"address\": \"456 Owner Avenue\",\n    \"email\": \"johndoe@example.com\",\n    \"mobile\": \"2345678901\",\n    \"phone\": \"1234567891\",\n    \"legal_national_id\": \"AB123456\"\n  },\n  \"balance\": 0.0,\n  \"allow_negative_balance\": false,\n  \"negative_balance_threshold\": 0.0\n}",
+                "form": []
+            }
         }
     ],
-    "ref": "f_g7vHUfaOT0qRTulndPg1dhgRZRduLok2UaE-bnltaLwQR_Gp5MKyd96uM3VfvWp9Kzj5hzKuobrBTQuqSz5A"
+    "ref": "f_g7vHUfaOT0qRTulndPg5IJLx0a-dCqgSk7h60wpBYxkIZJIjyDZ3hZIW3mSmb2mlb7m96qa9MWzY0KvaTZ6A"
 }
