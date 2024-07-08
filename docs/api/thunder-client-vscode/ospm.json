@@ -2,7 +2,7 @@
     "clientName": "Thunder Client",
     "collectionName": "ospm",
     "collectionId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
-    "dateExported": "2024-07-07T22:13:53.281Z",
+    "dateExported": "2024-07-08T00:14:01.747Z",
     "version": "1.2",
     "folders": [
         {
@@ -36,16 +36,40 @@
             "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
             "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
             "name": "GetOrganizationWithName",
-            "url": "http://127.0.0.1:9898/organization/profile?name=sample",
+            "url": "http://127.0.0.1:9898/organization/profile?name=Sample%20Organization%202",
             "method": "GET",
             "sortNum": 30000,
             "created": "2024-07-06T21:38:34.681Z",
-            "modified": "2024-07-06T21:38:59.923Z",
+            "modified": "2024-07-07T22:41:53.142Z",
             "headers": [],
             "params": [
                 {
                     "name": "name",
-                    "value": "sample",
+                    "value": "Sample%20Organization%202",
+                    "isPath": false
+                }
+            ]
+        },
+        {
+            "_id": "6f85487e-8fc0-4042-9495-df16cbe9c548",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
+            "name": "DeleteOrganizationWithName",
+            "url": "http://127.0.0.1:9898/organization?name=Sample%20Organization%202",
+            "method": "DELETE",
+            "sortNum": 35000,
+            "created": "2024-07-07T23:32:06.286Z",
+            "modified": "2024-07-07T23:37:37.823Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [
+                {
+                    "name": "name",
+                    "value": "Sample%20Organization%202",
                     "isPath": false
                 }
             ]
@@ -70,25 +94,68 @@
             ]
         },
         {
-            "_id": "fd3bbbbf-288f-46e6-8238-b8d0cdac649a",
+            "_id": "8bea9890-c59b-470b-a66e-3e504651a399",
             "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
             "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
-            "name": "GetOrganizationWithIDWithName",
-            "url": "http://127.0.0.1:9898/organization/profile?id=ed83a2ba-c55c-4297-b2ac-df7b02abdd7a&name=sample",
-            "method": "GET",
-            "sortNum": 50000,
-            "created": "2024-07-06T21:49:30.496Z",
-            "modified": "2024-07-06T21:49:58.641Z",
+            "name": "DeleteOrganizationWithID",
+            "url": "http://127.0.0.1:9898/organization?id=97ca0599-23e4-4dc7-a109-4dbc7440f449",
+            "method": "DELETE",
+            "sortNum": 45000,
+            "created": "2024-07-07T23:32:49.748Z",
+            "modified": "2024-07-08T00:10:34.000Z",
             "headers": [],
             "params": [
                 {
                     "name": "id",
-                    "value": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a",
+                    "value": "97ca0599-23e4-4dc7-a109-4dbc7440f449",
+                    "isPath": false
+                }
+            ]
+        },
+        {
+            "_id": "fd3bbbbf-288f-46e6-8238-b8d0cdac649a",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
+            "name": "GetOrganizationWithIDWithName",
+            "url": "http://127.0.0.1:9898/organization?id=50b01884-5ba2-495c-809c-7d5a2561c2f4&name=Sample%20Organization%202",
+            "method": "GET",
+            "sortNum": 50000,
+            "created": "2024-07-06T21:49:30.496Z",
+            "modified": "2024-07-08T00:12:37.220Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "id",
+                    "value": "50b01884-5ba2-495c-809c-7d5a2561c2f4",
                     "isPath": false
                 },
                 {
                     "name": "name",
-                    "value": "sample",
+                    "value": "Sample%20Organization%202",
+                    "isPath": false
+                }
+            ]
+        },
+        {
+            "_id": "dc8eb7a6-92e1-4859-bf49-0e9eb4f5ab3b",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
+            "name": "DeleteOrganizationWithIDWithName",
+            "url": "http://127.0.0.1:9898/organization?id=50b01884-5ba2-495c-809c-7d5a2561c2f4&name=Sample%20Organization%202",
+            "method": "DELETE",
+            "sortNum": 55000,
+            "created": "2024-07-07T23:33:20.982Z",
+            "modified": "2024-07-08T00:13:06.649Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "id",
+                    "value": "50b01884-5ba2-495c-809c-7d5a2561c2f4",
+                    "isPath": false
+                },
+                {
+                    "name": "name",
+                    "value": "Sample%20Organization%202",
                     "isPath": false
                 }
             ]
@@ -102,7 +169,7 @@
             "method": "POST",
             "sortNum": 60000,
             "created": "2024-07-07T22:08:28.591Z",
-            "modified": "2024-07-07T22:12:04.530Z",
+            "modified": "2024-07-07T22:19:04.893Z",
             "headers": [
                 {
                     "name": "Content-Type",
@@ -111,10 +178,10 @@
             ],
             "body": {
                 "type": "json",
-                "raw": "{\n  \"organization_details\": {\n    \"name\": \"Sample Organization\",\n    \"address\": \"123 Sample Street\",\n    \"email\": \"info@sample.org\",\n    \"mobile\": \"1234567890\",\n    \"phone\": \"0987654321\"\n  },\n  \"organization_owner\": {\n    \"type\": \"legal\",\n    \"name\": \"Mahmoud Ahmadi\",\n    \"address\": \"456 Owner Avenue\",\n    \"email\": \"johndoe@example.com\",\n    \"mobile\": \"2345678901\",\n    \"phone\": \"1234567891\",\n    \"legal_national_id\": \"AB123456\"\n  },\n  \"balance\": 0.0,\n  \"allow_negative_balance\": false,\n  \"negative_balance_threshold\": 0.0\n}",
+                "raw": "{\n  \"organization_details\": {\n    \"name\": \"Sample Organization 2\",\n    \"address\": \"123 Sample Street\",\n    \"email\": \"info2@sample.org\",\n    \"mobile\": \"12345678901\",\n    \"phone\": \"0987654321\"\n  },\n  \"organization_owner\": {\n    \"type\": \"legal\",\n    \"name\": \"Hamid Ahmadi\",\n    \"address\": \"456 Owner Avenue\",\n    \"email\": \"hamid@example.com\",\n    \"mobile\": \"23456789010\",\n    \"phone\": \"1234567891\",\n    \"legal_national_id\": \"AB123456\"\n  },\n  \"balance\": 0.0,\n  \"allow_negative_balance\": false,\n  \"negative_balance_threshold\": 0.0\n}",
                 "form": []
             }
         }
     ],
-    "ref": "f_g7vHUfaOT0qRTulndPg5IJLx0a-dCqgSk7h60wpBYxkIZJIjyDZ3hZIW3mSmb2mlb7m96qa9MWzY0KvaTZ6A"
+    "ref": "f_g7vHUfaOT0qRTulndPgxisoTdXzUBMr6RoTgZIw0CmgmgZsFEaTeKcGWjs2MF2GnKhYhwIEgmOueFbQMUiXA"
 }

@@ -10,6 +10,6 @@ func SetupOrganizationRoutes(rg fiber.Router) {
 	rg.Get("", handler.GetOrganizationList)
 	rg.Get("/profile", handler.GetOrganizationProfile)
 	rg.Post("", handler.AddNewOrganization)
+	rg.Delete("", handler.DeleteOrganization)
 	// rg.Patch("")
-	// rg.Delete("")
 }

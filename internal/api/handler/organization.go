@@ -127,3 +127,40 @@ func AddNewOrganization(context *fiber.Ctx) error {
 
 	return context.Status(201).JSON(responseMessage)
 }
+
+// @Summary 	Delete an organization
+// @Description Deletes an existing organization from the system. The organization can be specified by either its ID or name.
+// @Tags 		Organizations
+// @Accept 		json
+// @Produce 	json
+// @Param 		id query string false "Organization ID"
+// @Param 		name query string false "Organization Name"
+// @Success 	200 {object} map[string]string "Organization successfully deleted"
+// @Failure 	400 {object} models.APIError "Bad Request"
+// @Failure 	500 {object} models.APIError "Internal Server Error"
+// @Router 		/organizations/delete [delete]
+func DeleteOrganization(context *fiber.Ctx) error {
+	organizationName := context.Query("name")
+	organizationID := context.Query("id")
+
+	if organizationID == "" && organizationName == "" {
+		return context.Status(fiber.StatusBadRequest).JSON(models.APIError{
+			Error:   fiber.ErrBadRequest.Error(),
+			Message: "Either organization ID or name must be provided",
+		})
+	}
+
+	if err := organization.Delete(organizationID, organizationName); err != nil {
+		return context.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+			Error:   err.Error(),
+			Message: "failed to delete the organization",
+		})
+	}
+
+	responseMessage := map[string]string{
+		"message":                "organization successfulle deleted",
+		"organization_to_delete": fmt.Sprintf("%s %s", organizationID, organizationName),
+	}
+
+	return context.Status(200).JSON(responseMessage)
+}
