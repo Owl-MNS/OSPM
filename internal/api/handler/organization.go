@@ -10,14 +10,29 @@ import (
 )
 
 // @Summary 	List all organizations
-// @Description Retrieves a list of all organizations available in the system. each record is summarized
+//
+//	@Description \
+//				Retrieves a list of all organizations available \
+//				in the system. each record is summarized. \
+//				Soft deleteds will not be listed by default. \
+//				To include the soft deleted ones. set list_all=true as query paramater
+//
 // @Tags 		Organization
 // @Produce 	json
+// @Param 		list_all query string false "includes soft deleted organizations (Optional)"
 // @Success 	200 {array} models.OrganizationShortInfo "Successful Response"
 // @Failure 	500 {object} models.APIError "Internal Server Error"
-// @Router 		/organizations [get]
+// @Router 		/organization [get]
 func GetOrganizationList(context *fiber.Ctx) error {
-	organizationList, err := organization.List()
+	var organizationList []models.OrganizationShortInfo
+	var err error
+
+	if context.Query("list_all") == "true" {
+		organizationList, err = organization.ListAll()
+	} else {
+		organizationList, err = organization.List()
+	}
+
 	if err != nil {
 		return context.Status(fiber.StatusInternalServerError).JSON(models.APIError{
 			Error:   fiber.ErrInternalServerError.Error(),
@@ -32,20 +47,12 @@ func GetOrganizationList(context *fiber.Ctx) error {
 		})
 	}
 
-	listInJson, err := json.Marshal(organizationList)
-	if err != nil {
-		return context.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-			Error:   fiber.ErrInternalServerError.Error(),
-			Message: err.Error(),
-		})
-	}
-
-	return context.Status(200).Send(listInJson)
+	return context.Status(200).JSON(organizationList)
 }
 
 // @Summary 	Get organization profile by name or ID
 // @Description Retrieves detailed information about a specific organization identified by its name or ID.
-// @Tags 		Organizations
+// @Tags 		Organization
 // @Accept 		json
 // @Produce 	json
 // @Param 		name query string false "Organization Name" @in query
@@ -94,7 +101,7 @@ func GetOrganizationProfile(context *fiber.Ctx) error {
 
 // @Summary 	Add a new organization
 // @Description Adds a new organization to the system. The request body must contain the organization details.
-// @Tags 		Organizations
+// @Tags 		Organization
 // @Accept 		json
 // @Produce 	json
 // @Param 		body body models.Organization true "Organization details"
@@ -129,8 +136,14 @@ func AddNewOrganization(context *fiber.Ctx) error {
 }
 
 // @Summary 	Delete an organization
-// @Description Deletes an existing organization from the system. The organization can be specified by either its ID or name. Note that since the organization is unique in the entire system, the delete action actually deletes the organization in soft mode
-// @Tags 		Organizations
+//
+//	@Description \
+//			Deletes an existing organization from the system. \
+//			The organization can be specified by either its ID or name. \
+//			Note that since the organization is unique in the entire system, \
+//			the delete action actually deletes the organization in soft mode
+//
+// @Tags 		Organization
 // @Accept 		json
 // @Produce 	json
 // @Param 		id query string false "Organization ID"

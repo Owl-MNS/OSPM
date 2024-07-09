@@ -11,7 +11,8 @@ import (
 	"strings"
 )
 
-// List returns a list of organizations in shortened format
+// List returns a list of organizations in shortened format.
+// Organizations that are hard deleted will not be listed
 func List() ([]models.OrganizationShortInfo, error) {
 	organizationList := []models.Organization{}
 	result := cockroachdb.DB.Preload("Details").Find(&organizationList)
@@ -22,7 +23,20 @@ func List() ([]models.OrganizationShortInfo, error) {
 	}
 
 	return Shorten(organizationList), nil
+}
 
+// ListAll returns a list of organizations in shortened format.
+// Organizations that are hard deleted will be listed
+func ListAll() ([]models.OrganizationShortInfo, error) {
+	organizationList := []models.Organization{}
+	result := cockroachdb.DB.Unscoped().Preload("Details").Find(&organizationList)
+	if result.Error != nil {
+		errorMessage := fmt.Sprintf("failed to get list of organization, error: %s", result.Error)
+		OSPMLogger.Log.Errorln(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+
+	return Shorten(organizationList), nil
 }
 
 // Details gets the name of the desired organization name and returns the
@@ -294,6 +308,21 @@ func ClientIPCanHardDeleteOrganization(clientIP string) bool {
 
 	// Check if the client's IP is in the allowed list or ranges
 	for _, allowedIP := range strings.Split(config.OSPM.ClientPolicies.OrganizationSoftDeleteWhiteListedIPs, ",") {
+		if complementary.IPRangeCotains(clientIP, allowedIP) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// ClientIPCanListAllOrganization gets the client's IP and checks it among
+// the permited IPs. If the client's ip is whitelisted, returns true
+// whitelisted ips can list all of the organizations including soft deleteds
+func ClientIPCanListAllOrganization(clientIP string) bool {
+
+	// Check if the client's IP is in the allowed list or ranges
+	for _, allowedIP := range strings.Split(config.OSPM.ClientPolicies.ListAllOrganizationWhiteListedIPs, ",") {
 		if complementary.IPRangeCotains(clientIP, allowedIP) {
 			return true
 		}

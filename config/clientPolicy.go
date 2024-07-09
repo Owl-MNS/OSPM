@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 	"strings"
 )
@@ -8,6 +9,7 @@ import (
 type ClientPolicy struct {
 	OrganizationSoftDeleteWhiteListedIPs string
 	OrganizationHardDeleteWhiteListedIPs string
+	ListAllOrganizationWhiteListedIPs    string
 }
 
 func LoadClientPolicies() *ClientPolicy {
@@ -24,6 +26,14 @@ func LoadClientPolicies() *ClientPolicy {
 	if loadedClientPolicies.OrganizationHardDeleteWhiteListedIPs == "" {
 		loadedClientPolicies.OrganizationHardDeleteWhiteListedIPs = "0.0.0.0/0"
 	}
+
+	loadedClientPolicies.ListAllOrganizationWhiteListedIPs = os.Getenv("ORGANIZATION_LIST_ALL_CLIENT_WHITELIST_IP")
+	log.Println("Here ", loadedClientPolicies)
+	loadedClientPolicies.ListAllOrganizationWhiteListedIPs = strings.ReplaceAll(loadedClientPolicies.ListAllOrganizationWhiteListedIPs, " ", "")
+	if loadedClientPolicies.ListAllOrganizationWhiteListedIPs == "" {
+		loadedClientPolicies.ListAllOrganizationWhiteListedIPs = "0.0.0.0/0"
+	}
+	log.Println("Here ", loadedClientPolicies)
 
 	return loadedClientPolicies
 }
