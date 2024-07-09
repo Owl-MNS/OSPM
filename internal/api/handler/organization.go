@@ -129,19 +129,21 @@ func AddNewOrganization(context *fiber.Ctx) error {
 }
 
 // @Summary 	Delete an organization
-// @Description Deletes an existing organization from the system. The organization can be specified by either its ID or name.
+// @Description Deletes an existing organization from the system. The organization can be specified by either its ID or name. Note that since the organization is unique in the entire system, the delete action actually deletes the organization in soft mode
 // @Tags 		Organizations
 // @Accept 		json
 // @Produce 	json
 // @Param 		id query string false "Organization ID"
 // @Param 		name query string false "Organization Name"
+// @Param 		mode query string true "Deletion Mode: hard/soft"
 // @Success 	200 {object} map[string]string "Organization successfully deleted"
 // @Failure 	400 {object} models.APIError "Bad Request"
 // @Failure 	500 {object} models.APIError "Internal Server Error"
-// @Router 		/organizations/delete [delete]
+// @Router 		/organization [delete]
 func DeleteOrganization(context *fiber.Ctx) error {
 	organizationName := context.Query("name")
 	organizationID := context.Query("id")
+	deletionMode := context.Query("mode")
 
 	if organizationID == "" && organizationName == "" {
 		return context.Status(fiber.StatusBadRequest).JSON(models.APIError{
@@ -150,11 +152,27 @@ func DeleteOrganization(context *fiber.Ctx) error {
 		})
 	}
 
-	if err := organization.Delete(organizationID, organizationName); err != nil {
-		return context.Status(fiber.StatusInternalServerError).JSON(models.APIError{
-			Error:   err.Error(),
-			Message: "failed to delete the organization",
+	switch deletionMode {
+	case "soft":
+		if err := organization.SoftDelete(organizationID, organizationName); err != nil {
+			return context.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+				Error:   err.Error(),
+				Message: "failed to delete the organization",
+			})
+		}
+	case "hard":
+		if err := organization.HardDelete(organizationID, organizationName); err != nil {
+			return context.Status(fiber.StatusInternalServerError).JSON(models.APIError{
+				Error:   err.Error(),
+				Message: "failed to delete the organization",
+			})
+		}
+	default:
+		return context.Status(fiber.ErrBadRequest.Code).JSON(models.APIError{
+			Error:   fiber.ErrBadRequest.Error(),
+			Message: "the deletion mode should be provided. valid values are: soft/hard",
 		})
+
 	}
 
 	responseMessage := map[string]string{

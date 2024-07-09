@@ -8,9 +8,10 @@ import (
 )
 
 type OSPMConfig struct {
-	API    *APISetting
-	Logrus *LogrusConfig
-	RDMS   *CockRoachDBConfig
+	API            *APISetting
+	Logrus         *LogrusConfig
+	RDMS           *CockRoachDBConfig
+	ClientPolicies *ClientPolicy
 }
 
 var OSPM *OSPMConfig
@@ -30,9 +31,10 @@ func LoadOSPMConfigs() {
 	LoadLocalEnvironments()
 
 	OSPM = &OSPMConfig{
-		API:    LoadAPISettings(),
-		Logrus: LoadLogrusConfigs(),
-		RDMS:   LoadCockroachDBConfigs(),
+		API:            LoadAPISettings(),
+		Logrus:         LoadLogrusConfigs(),
+		RDMS:           LoadCockroachDBConfigs(),
+		ClientPolicies: LoadClientPolicies(),
 	}
 }
 

@@ -3,9 +3,12 @@ package organization
 import (
 	"errors"
 	"fmt"
+	"ospm/config"
 	"ospm/internal/models"
 	"ospm/internal/repository/database/cockroachdb"
+	"ospm/internal/service/complementary"
 	OSPMLogger "ospm/internal/service/log"
+	"strings"
 )
 
 // List returns a list of organizations in shortened format
@@ -66,12 +69,60 @@ func New(newOrganization models.Organization) (newOrganzationID string, err erro
 	return newOrganization.ID, nil
 }
 
-// Delete deletes the desired organization and does not impact
+// SoftDelete deletes the desired organization and does not impact
 // the other related entities like subscriber, permissions and etc.
-func Delete(organizationID string, organizationName string) error {
+// The delete action happens in soft mode
+func SoftDelete(organizationID string, organizationName string) error {
 	var organization models.Organization
 
 	query := cockroachdb.DB.Joins("left join organization_details on organization_details.organization_id = organizations.id")
+
+	if organizationID != "" {
+		query = query.Where("organizations.id = ?", organizationID)
+	} else if organizationName != "" {
+		query = query.Where("organization_details.name = ?", organizationName)
+	}
+
+	err := query.First(&organization).Error
+	if err != nil {
+		errorMessage := fmt.Sprintf("failed to find organization to delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Start a transaction
+	tx := cockroachdb.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Perform the delete operation with cascading deletes with HARD DELETE Enabled!
+	if err := tx.Select("Details", "Owner").Delete(&organization).Error; err != nil {
+		tx.Rollback()
+		errorMessage := fmt.Sprintf("failed to delete organization and related records, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		errorMessage := fmt.Sprintf("failed to commit transaction, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	return nil
+}
+
+// HardDelete deletes the desired organization and does not impact
+// the other related entities like subscriber, permissions and etc.
+// The delete action happens in hard mode
+func HardDelete(organizationID string, organizationName string) error {
+	var organization models.Organization
+
+	query := cockroachdb.DB.Unscoped().Joins("left join organization_details on organization_details.organization_id = organizations.id")
 
 	if organizationID != "" {
 		query = query.Where("organizations.id = ?", organizationID)
@@ -221,4 +272,32 @@ func Clean(organization *models.Organization) models.OrganizationResponse {
 		},
 	}
 
+}
+
+// ClientIPCanSoftDeleteOrganization gets the client's IP and checks it among
+// the permited IPs. If the client's ip is whitelisted, returns true
+func ClientIPCanSoftDeleteOrganization(clientIP string) bool {
+
+	// Check if the client's IP is in the allowed list or ranges
+	for _, allowedIP := range strings.Split(config.OSPM.ClientPolicies.OrganizationSoftDeleteWhiteListedIPs, ",") {
+		if complementary.IPRangeCotains(clientIP, allowedIP) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// ClientIPCanSoftDeleteOrganization gets the client's IP and checks it among
+// the permited IPs. If the client's ip is whitelisted, returns true
+func ClientIPCanHardDeleteOrganization(clientIP string) bool {
+
+	// Check if the client's IP is in the allowed list or ranges
+	for _, allowedIP := range strings.Split(config.OSPM.ClientPolicies.OrganizationSoftDeleteWhiteListedIPs, ",") {
+		if complementary.IPRangeCotains(clientIP, allowedIP) {
+			return true
+		}
+	}
+
+	return false
 }
