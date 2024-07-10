@@ -2,7 +2,7 @@
     "clientName": "Thunder Client",
     "collectionName": "ospm",
     "collectionId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
-    "dateExported": "2024-07-08T00:14:01.747Z",
+    "dateExported": "2024-07-10T00:24:56.062Z",
     "version": "1.2",
     "folders": [
         {
@@ -19,15 +19,22 @@
             "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
             "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
             "name": "GetOrganizationList",
-            "url": "http://127.0.0.1:9898/organization",
+            "url": "http://127.0.0.1:9898/organization?list_all=true",
             "method": "GET",
             "sortNum": 20000,
             "created": "2024-07-06T20:49:49.537Z",
-            "modified": "2024-07-06T20:52:38.862Z",
+            "modified": "2024-07-10T00:21:48.675Z",
             "headers": [
                 {
                     "name": "Content-Type",
                     "value": "application/json"
+                }
+            ],
+            "params": [
+                {
+                    "name": "list_all",
+                    "value": "true",
+                    "isPath": false
                 }
             ]
         },
@@ -35,7 +42,7 @@
             "_id": "796adf99-7782-4fa8-951b-fa76c04f1b90",
             "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
             "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
-            "name": "GetOrganizationWithName",
+            "name": "GetOrganizationByName",
             "url": "http://127.0.0.1:9898/organization/profile?name=Sample%20Organization%202",
             "method": "GET",
             "sortNum": 30000,
@@ -54,7 +61,7 @@
             "_id": "6f85487e-8fc0-4042-9495-df16cbe9c548",
             "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
             "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
-            "name": "DeleteOrganizationWithName",
+            "name": "DeleteOrganizationByName",
             "url": "http://127.0.0.1:9898/organization?name=Sample%20Organization%202",
             "method": "DELETE",
             "sortNum": 35000,
@@ -78,17 +85,17 @@
             "_id": "acc2ac02-3d7e-4fe5-8b4b-c4395ef7922b",
             "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
             "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
-            "name": "GetOrganizationWithID",
-            "url": "http://127.0.0.1:9898/organization/profile?id=ed83a2ba-c55c-4297-b2ac-df7b02abdd7a",
+            "name": "GetOrganizationByID",
+            "url": "http://127.0.0.1:9898/organization/profile?id=0bc8016c-c4bf-4809-b8d4-ce7eb1739721",
             "method": "GET",
             "sortNum": 40000,
             "created": "2024-07-06T21:43:52.300Z",
-            "modified": "2024-07-06T21:49:15.355Z",
+            "modified": "2024-07-10T00:22:05.882Z",
             "headers": [],
             "params": [
                 {
                     "name": "id",
-                    "value": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a",
+                    "value": "0bc8016c-c4bf-4809-b8d4-ce7eb1739721",
                     "isPath": false
                 }
             ]
@@ -97,17 +104,41 @@
             "_id": "8bea9890-c59b-470b-a66e-3e504651a399",
             "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
             "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
-            "name": "DeleteOrganizationWithID",
-            "url": "http://127.0.0.1:9898/organization?id=97ca0599-23e4-4dc7-a109-4dbc7440f449",
+            "name": "DeleteOrganizationByID",
+            "url": "http://127.0.0.1:9898/organization?id=0bc8016c-c4bf-4809-b8d4-ce7eb1739721&mode=soft",
             "method": "DELETE",
             "sortNum": 45000,
             "created": "2024-07-07T23:32:49.748Z",
-            "modified": "2024-07-08T00:10:34.000Z",
+            "modified": "2024-07-09T22:54:03.793Z",
             "headers": [],
             "params": [
                 {
                     "name": "id",
-                    "value": "97ca0599-23e4-4dc7-a109-4dbc7440f449",
+                    "value": "0bc8016c-c4bf-4809-b8d4-ce7eb1739721",
+                    "isPath": false
+                },
+                {
+                    "name": "mode",
+                    "value": "soft",
+                    "isPath": false
+                }
+            ]
+        },
+        {
+            "_id": "648ceca0-6dae-488a-b922-43b7813030a9",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
+            "name": "RecoverOrganizationByID",
+            "url": "http://127.0.0.1:9898/organization/recover/profile?id=0bc8016c-c4bf-4809-b8d4-ce7eb1739721",
+            "method": "PATCH",
+            "sortNum": 47500,
+            "created": "2024-07-10T00:11:44.684Z",
+            "modified": "2024-07-10T00:19:55.966Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "id",
+                    "value": "0bc8016c-c4bf-4809-b8d4-ce7eb1739721",
                     "isPath": false
                 }
             ]
@@ -116,7 +147,7 @@
             "_id": "fd3bbbbf-288f-46e6-8238-b8d0cdac649a",
             "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
             "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
-            "name": "GetOrganizationWithIDWithName",
+            "name": "GetOrganizationByIDByName",
             "url": "http://127.0.0.1:9898/organization?id=50b01884-5ba2-495c-809c-7d5a2561c2f4&name=Sample%20Organization%202",
             "method": "GET",
             "sortNum": 50000,
@@ -140,7 +171,7 @@
             "_id": "dc8eb7a6-92e1-4859-bf49-0e9eb4f5ab3b",
             "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
             "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
-            "name": "DeleteOrganizationWithIDWithName",
+            "name": "DeleteOrganizationByIDByName",
             "url": "http://127.0.0.1:9898/organization?id=50b01884-5ba2-495c-809c-7d5a2561c2f4&name=Sample%20Organization%202",
             "method": "DELETE",
             "sortNum": 55000,
@@ -169,7 +200,7 @@
             "method": "POST",
             "sortNum": 60000,
             "created": "2024-07-07T22:08:28.591Z",
-            "modified": "2024-07-07T22:19:04.893Z",
+            "modified": "2024-07-10T00:16:30.956Z",
             "headers": [
                 {
                     "name": "Content-Type",
@@ -178,10 +209,10 @@
             ],
             "body": {
                 "type": "json",
-                "raw": "{\n  \"organization_details\": {\n    \"name\": \"Sample Organization 2\",\n    \"address\": \"123 Sample Street\",\n    \"email\": \"info2@sample.org\",\n    \"mobile\": \"12345678901\",\n    \"phone\": \"0987654321\"\n  },\n  \"organization_owner\": {\n    \"type\": \"legal\",\n    \"name\": \"Hamid Ahmadi\",\n    \"address\": \"456 Owner Avenue\",\n    \"email\": \"hamid@example.com\",\n    \"mobile\": \"23456789010\",\n    \"phone\": \"1234567891\",\n    \"legal_national_id\": \"AB123456\"\n  },\n  \"balance\": 0.0,\n  \"allow_negative_balance\": false,\n  \"negative_balance_threshold\": 0.0\n}",
+                "raw": "{\n  \"organization_details\": {\n    \"name\": \"Sample Organization 4\",\n    \"address\": \"123 Sample Street\",\n    \"email\": \"info4@sample.org\",\n    \"mobile\": \"1234567890124\",\n    \"phone\": \"0987654321\"\n  },\n  \"organization_owner\": {\n    \"type\": \"legal\",\n    \"name\": \"Ario2 Ahmadi\",\n    \"address\": \"456 Owner Avenue\",\n    \"email\": \"ario2@example.com\",\n    \"mobile\": \"23456789010234\",\n    \"phone\": \"1234567891\",\n    \"legal_national_id\": \"AB1234562\"\n  },\n  \"balance\": 0.0,\n  \"allow_negative_balance\": false,\n  \"negative_balance_threshold\": 0.0\n}",
                 "form": []
             }
         }
     ],
-    "ref": "f_g7vHUfaOT0qRTulndPgxisoTdXzUBMr6RoTgZIw0CmgmgZsFEaTeKcGWjs2MF2GnKhYhwIEgmOueFbQMUiXA"
+    "ref": "f_g7vHUfaOT0qRTulndPg7Moh8mvvMQeKKsMJ591h1uHn39uM_qwFbd9PqUtIfPB5OcyD3XubcZUwJ8snP8NmA"
 }
