@@ -19,13 +19,7 @@ func InitialDB() {
 		log.Fatal("failed to connect to database: ", err)
 	}
 
-	// Create the uuid-ossp extension
-	err = DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error
-	if err != nil {
-		log.Fatal("failed to create uuid-ossp extension: ", err)
-	}
-
-	// Optional: Ping the database to ensure the connection is alive
+	// Ping the database to ensure the connection is alive
 	sqlDB, err := DB.DB()
 	if err != nil {
 		log.Fatal("failed to get generic database object: ", err)
@@ -33,7 +27,13 @@ func InitialDB() {
 
 	err = sqlDB.Ping()
 	if err != nil {
-		log.Fatal("failed to ping database: ", err)
+		log.Fatal("failed to connect to the database: ", err)
+	}
+
+	// Create the uuid-ossp extension
+	err = DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error
+	if err != nil {
+		log.Fatal("failed to create uuid-ossp extension: ", err)
 	}
 
 	log.Println("database connection established successfully")
