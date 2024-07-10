@@ -27,6 +27,13 @@ func OrganizationPolicyCheck(context *fiber.Ctx) error {
 
 	case "POST":
 		return context.Next()
+
+	case "PATCH":
+		apiError, err := organization.PatchPolicyCheck(context)
+		if err != nil {
+			return context.Status(fiber.ErrBadRequest.Code).JSON(apiError)
+		}
+		return context.Next()
 	}
 
 	return context.Status(fiber.ErrInternalServerError.Code).JSON(models.APIError{

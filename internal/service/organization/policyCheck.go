@@ -24,6 +24,17 @@ func GetPolicyCheck(context *fiber.Ctx) (models.APIError, error) {
 	return models.APIError{}, nil
 }
 
+func PatchPolicyCheck(context *fiber.Ctx) (models.APIError, error) {
+	if ClientIPCanUndoOrganizationSoftDelete(context.IP()) {
+		return models.APIError{}, nil
+	} else {
+		return models.APIError{
+			Error:   fiber.ErrBadRequest.Error(),
+			Message: "the client is not permitted to undo organization soft delete",
+		}, errors.New("")
+	}
+}
+
 func DeletePolicyCheck(context *fiber.Ctx) (models.APIError, error) {
 	switch context.Query("mode") {
 	case "soft":

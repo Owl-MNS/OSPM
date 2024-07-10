@@ -330,3 +330,75 @@ func ClientIPCanListAllOrganization(clientIP string) bool {
 
 	return false
 }
+
+// ClientIPCanUndoOrganizationSoftDelete gets the client ip and checks it
+// among permitted IPs. If the client's ip is whitelisted, returns true
+func ClientIPCanUndoOrganizationSoftDelete(clientIP string) bool {
+
+	// Check if the client's IP is in the allowed list or ranges
+	for _, allowedIP := range strings.Split(config.OSPM.ClientPolicies.UndoOrganizationSoftDeleteWhiteListedIPs, ",") {
+		if complementary.IPRangeCotains(clientIP, allowedIP) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// Recover truncates the deleted_at field from the database which
+// recovers the organization from soft delete
+func Recover(organizationID string, organizationName string) error {
+	var organization models.Organization
+
+	query := cockroachdb.DB.Unscoped().Joins("left join organization_details on organization_details.organization_id = organizations.id")
+
+	if organizationID != "" {
+		query = query.Where("organizations.id = ?", organizationID)
+	} else if organizationName != "" {
+		query = query.Where("organization_details.name = ?", organizationName)
+	}
+
+	err := query.First(&organization).Error
+	if err != nil {
+		errorMessage := fmt.Sprintf("failed to find organization to delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Start the transaction
+	tx := cockroachdb.DB.Begin()
+
+	// Restore the organization
+	if err := tx.Unscoped().Model(&models.Organization{}).Where("id = ?", organization.ID).Update("deleted_at", nil).Error; err != nil {
+		tx.Rollback()
+		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Restore organization details
+	if err := tx.Unscoped().Model(&models.OrganizationDetails{}).Where("organization_id = ?", organization.ID).Update("deleted_at", nil).Error; err != nil {
+		tx.Rollback()
+		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Restore related owner
+	if err := tx.Unscoped().Model(&models.OrganizationOwner{}).Where("organization_id = ?", organization.ID).Update("deleted_at", nil).Error; err != nil {
+		tx.Rollback()
+		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	return nil
+}
