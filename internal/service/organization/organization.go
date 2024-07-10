@@ -3,12 +3,16 @@ package organization
 import (
 	"errors"
 	"fmt"
+	"ospm/config"
 	"ospm/internal/models"
 	"ospm/internal/repository/database/cockroachdb"
+	"ospm/internal/service/complementary"
 	OSPMLogger "ospm/internal/service/log"
+	"strings"
 )
 
-// List returns a list of organizations in shortened format
+// List returns a list of organizations in shortened format.
+// Organizations that are hard deleted will not be listed
 func List() ([]models.OrganizationShortInfo, error) {
 	organizationList := []models.Organization{}
 	result := cockroachdb.DB.Preload("Details").Find(&organizationList)
@@ -19,7 +23,20 @@ func List() ([]models.OrganizationShortInfo, error) {
 	}
 
 	return Shorten(organizationList), nil
+}
 
+// ListAll returns a list of organizations in shortened format.
+// Organizations that are hard deleted will be listed
+func ListAll() ([]models.OrganizationShortInfo, error) {
+	organizationList := []models.Organization{}
+	result := cockroachdb.DB.Unscoped().Preload("Details").Find(&organizationList)
+	if result.Error != nil {
+		errorMessage := fmt.Sprintf("failed to get list of organization, error: %s", result.Error)
+		OSPMLogger.Log.Errorln(errorMessage)
+		return nil, errors.New(errorMessage)
+	}
+
+	return Shorten(organizationList), nil
 }
 
 // Details gets the name of the desired organization name and returns the
@@ -64,6 +81,100 @@ func New(newOrganization models.Organization) (newOrganzationID string, err erro
 	}
 
 	return newOrganization.ID, nil
+}
+
+// SoftDelete deletes the desired organization and does not impact
+// the other related entities like subscriber, permissions and etc.
+// The delete action happens in soft mode
+func SoftDelete(organizationID string, organizationName string) error {
+	var organization models.Organization
+
+	query := cockroachdb.DB.Joins("left join organization_details on organization_details.organization_id = organizations.id")
+
+	if organizationID != "" {
+		query = query.Where("organizations.id = ?", organizationID)
+	} else if organizationName != "" {
+		query = query.Where("organization_details.name = ?", organizationName)
+	}
+
+	err := query.First(&organization).Error
+	if err != nil {
+		errorMessage := fmt.Sprintf("failed to find organization to delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Start a transaction
+	tx := cockroachdb.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Perform the delete operation with cascading deletes with HARD DELETE Enabled!
+	if err := tx.Select("Details", "Owner").Delete(&organization).Error; err != nil {
+		tx.Rollback()
+		errorMessage := fmt.Sprintf("failed to delete organization and related records, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		errorMessage := fmt.Sprintf("failed to commit transaction, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	return nil
+}
+
+// HardDelete deletes the desired organization and does not impact
+// the other related entities like subscriber, permissions and etc.
+// The delete action happens in hard mode
+func HardDelete(organizationID string, organizationName string) error {
+	var organization models.Organization
+
+	query := cockroachdb.DB.Unscoped().Joins("left join organization_details on organization_details.organization_id = organizations.id")
+
+	if organizationID != "" {
+		query = query.Where("organizations.id = ?", organizationID)
+	} else if organizationName != "" {
+		query = query.Where("organization_details.name = ?", organizationName)
+	}
+
+	err := query.First(&organization).Error
+	if err != nil {
+		errorMessage := fmt.Sprintf("failed to find organization to delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Start a transaction
+	tx := cockroachdb.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Perform the delete operation with cascading deletes with HARD DELETE Enabled!
+	if err := tx.Unscoped().Select("Details", "Owner").Delete(&organization).Error; err != nil {
+		tx.Rollback()
+		errorMessage := fmt.Sprintf("failed to delete organization and related records, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		errorMessage := fmt.Sprintf("failed to commit transaction, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	return nil
 }
 
 // Shorten gets a list of organizations and returns a list of organizations just including
@@ -175,4 +286,119 @@ func Clean(organization *models.Organization) models.OrganizationResponse {
 		},
 	}
 
+}
+
+// ClientIPCanSoftDeleteOrganization gets the client's IP and checks it among
+// the permited IPs. If the client's ip is whitelisted, returns true
+func ClientIPCanSoftDeleteOrganization(clientIP string) bool {
+
+	// Check if the client's IP is in the allowed list or ranges
+	for _, allowedIP := range strings.Split(config.OSPM.ClientPolicies.OrganizationSoftDeleteWhiteListedIPs, ",") {
+		if complementary.IPRangeCotains(clientIP, allowedIP) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// ClientIPCanSoftDeleteOrganization gets the client's IP and checks it among
+// the permited IPs. If the client's ip is whitelisted, returns true
+func ClientIPCanHardDeleteOrganization(clientIP string) bool {
+
+	// Check if the client's IP is in the allowed list or ranges
+	for _, allowedIP := range strings.Split(config.OSPM.ClientPolicies.OrganizationSoftDeleteWhiteListedIPs, ",") {
+		if complementary.IPRangeCotains(clientIP, allowedIP) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// ClientIPCanListAllOrganization gets the client's IP and checks it among
+// the permited IPs. If the client's ip is whitelisted, returns true
+// whitelisted ips can list all of the organizations including soft deleteds
+func ClientIPCanListAllOrganization(clientIP string) bool {
+
+	// Check if the client's IP is in the allowed list or ranges
+	for _, allowedIP := range strings.Split(config.OSPM.ClientPolicies.ListAllOrganizationWhiteListedIPs, ",") {
+		if complementary.IPRangeCotains(clientIP, allowedIP) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// ClientIPCanUndoOrganizationSoftDelete gets the client ip and checks it
+// among permitted IPs. If the client's ip is whitelisted, returns true
+func ClientIPCanUndoOrganizationSoftDelete(clientIP string) bool {
+
+	// Check if the client's IP is in the allowed list or ranges
+	for _, allowedIP := range strings.Split(config.OSPM.ClientPolicies.UndoOrganizationSoftDeleteWhiteListedIPs, ",") {
+		if complementary.IPRangeCotains(clientIP, allowedIP) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// Recover truncates the deleted_at field from the database which
+// recovers the organization from soft delete
+func Recover(organizationID string, organizationName string) error {
+	var organization models.Organization
+
+	query := cockroachdb.DB.Unscoped().Joins("left join organization_details on organization_details.organization_id = organizations.id")
+
+	if organizationID != "" {
+		query = query.Where("organizations.id = ?", organizationID)
+	} else if organizationName != "" {
+		query = query.Where("organization_details.name = ?", organizationName)
+	}
+
+	err := query.First(&organization).Error
+	if err != nil {
+		errorMessage := fmt.Sprintf("failed to find organization to delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Start the transaction
+	tx := cockroachdb.DB.Begin()
+
+	// Restore the organization
+	if err := tx.Unscoped().Model(&models.Organization{}).Where("id = ?", organization.ID).Update("deleted_at", nil).Error; err != nil {
+		tx.Rollback()
+		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Restore organization details
+	if err := tx.Unscoped().Model(&models.OrganizationDetails{}).Where("organization_id = ?", organization.ID).Update("deleted_at", nil).Error; err != nil {
+		tx.Rollback()
+		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Restore related owner
+	if err := tx.Unscoped().Model(&models.OrganizationOwner{}).Where("organization_id = ?", organization.ID).Update("deleted_at", nil).Error; err != nil {
+		tx.Rollback()
+		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
+		OSPMLogger.Log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	return nil
 }
