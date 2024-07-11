@@ -1,0 +1,356 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This document covers the API endpoints exposed by Owl MNS Subscriber Profile Manager.",
+        "title": "Owl MNS - OSPM - API Reference",
+        "contact": {
+            "name": "Mahmoud Ahmadi",
+            "email": "ma.ahmadi1989@gmail.com"
+        },
+        "version": "1.0"
+    },
+    "paths": {
+        "/organization": {
+            "get": {
+                "description": "\\",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "List all organizations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "includes soft deleted organizations (Optional)",
+                        "name": "list_all",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.OrganizationShortInfo"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Adds a new organization to the system. The request body must contain the organization details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Add a new organization",
+                "parameters": [
+                    {
+                        "description": "Organization details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Organization"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Organization successfully added",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "\\",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Delete an organization",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Organization Name",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Deletion Mode: hard/soft",
+                        "name": "mode",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Organization successfully deleted",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/organization/recover/profile": {
+            "patch": {
+                "description": "\\",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Recover s soft deleted organization",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Organization Name",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Organization successfully deleted",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/organizations/profile": {
+            "get": {
+                "description": "Retrieves detailed information about a specific organization identified by its name or ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Get organization profile by name or ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Name",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "schema": {
+                            "$ref": "#/definitions/models.OrganizationResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Organization Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.APIError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "This field determines the raised error",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "This field determines the detailed information about raise error",
+                    "type": "string"
+                }
+            }
+        },
+        "models.Organization": {
+            "type": "object"
+        },
+        "models.OrganizationDetailsResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.OrganizationOwnerResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "legal_national_id": {
+                    "type": "string"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.OrganizationResponse": {
+            "type": "object",
+            "properties": {
+                "allow_negative_balance": {
+                    "type": "boolean"
+                },
+                "balance": {
+                    "type": "number"
+                },
+                "negative_balance_threshold": {
+                    "type": "number"
+                },
+                "organization_details": {
+                    "$ref": "#/definitions/models.OrganizationDetailsResponse"
+                },
+                "organization_id": {
+                    "type": "string",
+                    "example": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a"
+                },
+                "organization_owner": {
+                    "$ref": "#/definitions/models.OrganizationOwnerResponse"
+                }
+            }
+        },
+        "models.OrganizationShortInfo": {
+            "type": "object",
+            "properties": {
+                "organization_id": {
+                    "description": "This field determines the unique id of the organization. The id is in uuid v4 format",
+                    "type": "string",
+                    "example": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a"
+                },
+                "organization_name": {
+                    "description": "This field determines the name of the organization",
+                    "type": "string",
+                    "example": "sample organization"
+                }
+            }
+        }
+    }
+}

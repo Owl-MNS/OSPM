@@ -5,6 +5,7 @@ import (
 )
 
 func Setup(app *fiber.App) {
+	SetupAPIDocs(app.Group("/apidoc"))
 	SetupOrganizationRoutes(app.Group("/organization"))
 
 }

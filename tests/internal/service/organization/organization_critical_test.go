@@ -1,9 +1,10 @@
 //go:build critical
 
-package organization
+package organizationTests
 
 import (
 	"ospm/config"
+	"ospm/internal/service/organization"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -30,6 +31,12 @@ func TestClientIPCanListAllOrganization(t *testing.T) {
 			clientIP:       "192.168.1.12",
 			expectedResult: false,
 		},
+		{
+			name:           "whitelist is empty. In this case, the output should be false",
+			whitelist:      "",
+			clientIP:       "192.168.1.12",
+			expectedResult: false,
+		},
 	}
 
 	config.LoadOSPMConfigs()
@@ -42,7 +49,7 @@ func TestClientIPCanListAllOrganization(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			config.OSPM.ClientPolicies.ListAllOrganizationWhiteListedIPs = tc.whitelist
-			output := ClientIPCanListAllOrganization(tc.clientIP)
+			output := organization.ClientIPCanListAllOrganization(tc.clientIP)
 
 			assert.Equal(t, tc.expectedResult, output)
 		})

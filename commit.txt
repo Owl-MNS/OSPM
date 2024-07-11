@@ -1,4 +1,0 @@
-feat: adds loggin utility
-
-    - adds logrus as the logger of the application
-    

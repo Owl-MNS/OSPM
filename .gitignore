@@ -23,3 +23,6 @@ go.work.sum
 
 # development config.env file
 config.env
+
+# commit message
+commit.txt

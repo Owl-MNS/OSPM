@@ -1,0 +1,239 @@
+definitions:
+  models.APIError:
+    properties:
+      error:
+        description: This field determines the raised error
+        type: string
+      message:
+        description: This field determines the detailed information about raise error
+        type: string
+    type: object
+  models.Organization:
+    type: object
+  models.OrganizationDetailsResponse:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      mobile:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  models.OrganizationOwnerResponse:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      legal_national_id:
+        type: string
+      mobile:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      type:
+        type: string
+    type: object
+  models.OrganizationResponse:
+    properties:
+      allow_negative_balance:
+        type: boolean
+      balance:
+        type: number
+      negative_balance_threshold:
+        type: number
+      organization_details:
+        $ref: '#/definitions/models.OrganizationDetailsResponse'
+      organization_id:
+        example: ed83a2ba-c55c-4297-b2ac-df7b02abdd7a
+        type: string
+      organization_owner:
+        $ref: '#/definitions/models.OrganizationOwnerResponse'
+    type: object
+  models.OrganizationShortInfo:
+    properties:
+      organization_id:
+        description: This field determines the unique id of the organization. The
+          id is in uuid v4 format
+        example: ed83a2ba-c55c-4297-b2ac-df7b02abdd7a
+        type: string
+      organization_name:
+        description: This field determines the name of the organization
+        example: sample organization
+        type: string
+    type: object
+info:
+  contact:
+    email: ma.ahmadi1989@gmail.com
+    name: Mahmoud Ahmadi
+  description: This document covers the API endpoints exposed by Owl MNS Subscriber
+    Profile Manager.
+  title: Owl MNS - OSPM - API Reference
+  version: "1.0"
+paths:
+  /organization:
+    delete:
+      consumes:
+      - application/json
+      description: \
+      parameters:
+      - description: Organization ID
+        in: query
+        name: id
+        type: string
+      - description: Organization Name
+        in: query
+        name: name
+        type: string
+      - description: 'Deletion Mode: hard/soft'
+        in: query
+        name: mode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Organization successfully deleted
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Delete an organization
+      tags:
+      - Organization
+    get:
+      description: \
+      parameters:
+      - description: includes soft deleted organizations (Optional)
+        in: query
+        name: list_all
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful Response
+          schema:
+            items:
+              $ref: '#/definitions/models.OrganizationShortInfo'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: List all organizations
+      tags:
+      - Organization
+    post:
+      consumes:
+      - application/json
+      description: Adds a new organization to the system. The request body must contain
+        the organization details.
+      parameters:
+      - description: Organization details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Organization'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Organization successfully added
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Add a new organization
+      tags:
+      - Organization
+  /organization/recover/profile:
+    patch:
+      description: \
+      parameters:
+      - description: Organization ID
+        in: query
+        name: id
+        type: string
+      - description: Organization Name
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Organization successfully deleted
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Recover s soft deleted organization
+      tags:
+      - Organization
+  /organizations/profile:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves detailed information about a specific organization identified
+        by its name or ID.
+      parameters:
+      - description: Organization Name
+        in: query
+        name: name
+        type: string
+      - description: Organization ID
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful Response
+          schema:
+            $ref: '#/definitions/models.OrganizationResponse'
+        "404":
+          description: Organization Not Found
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Get organization profile by name or ID
+      tags:
+      - Organization
+swagger: "2.0"
