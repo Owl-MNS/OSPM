@@ -10,6 +10,7 @@ import (
 func SetupOrganizationRoutes(rg fiber.Router) {
 	rg.Get("", middleware.OrganizationPolicyCheck, handler.GetOrganizationList)
 	rg.Get("/profile", middleware.OrganizationPolicyCheck, handler.GetOrganizationProfile)
+	rg.Get("/:organization_id/subscriber-group", handler.GetOrganizationGroupList)
 	rg.Post("", middleware.OrganizationPolicyCheck, handler.AddNewOrganization)
 	rg.Delete("", middleware.OrganizationPolicyCheck, handler.DeleteOrganization)
 	rg.Patch("/recover/profile", middleware.OrganizationPolicyCheck, handler.RecoverSoftDeletedOrganization)

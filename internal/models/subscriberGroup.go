@@ -10,3 +10,10 @@ type SubscriberGroup struct {
 	Permissions    string `gorm:"type:uuid;" json:"subscriber_group_permissions_id"`
 	OrganizationID string `gorm:"type:uuid;not null;index;" json:"organization_id"`
 }
+
+// SubscriberGroupMinimal is use in API calls which contains a minimal version of
+// subscriber group that can be used in listing or addressing
+type SubscriberGroupMinimal struct {
+	ID   string `json:"subscriber_group_id" example:"ed83a2ba-c55c-4297-b2ac-df7b02abdd7a"`
+	Name string `json:"subscriber_group_name" example:"sample group"`
+}
