@@ -184,7 +184,7 @@ func TestClientIPCanSoftDeleteOrganization(t *testing.T) {
 }
 
 // x
-func Test(t *testing.T) {
+func TestDetailsCheck(t *testing.T) {
 	type testCase struct {
 		name                string
 		organizationDetails models.Organization
@@ -193,7 +193,7 @@ func Test(t *testing.T) {
 
 	testCases := []testCase{
 		{
-			name:           "the organization details has the values that meets the value rules",
+			name:           "the organization details has the values that meets the value rules and should be accepted",
 			expectedResult: nil,
 			organizationDetails: models.Organization{
 				Details: models.OrganizationDetails{
@@ -417,6 +417,156 @@ func Test(t *testing.T) {
 				NegativeBalanceThreshold: -100,
 			},
 		},
+		{
+			name:           "the organization name is empty that should be accepted",
+			expectedResult: errors.New("organization Name can not be empty while creating the organization"),
+			organizationDetails: models.Organization{
+				Details: models.OrganizationDetails{
+					Name:    "",
+					Address: "123 Sample Street",
+					Email:   "info4@sample.org",
+					Mobile:  "1234567890124",
+					Phone:   "0987654321",
+				},
+				Owner: models.OrganizationOwner{
+					Type:            "legal",
+					Name:            "Ario2 Ahmadi",
+					Address:         "456 Owner Avenue",
+					Email:           "ario2@example.com",
+					Mobile:          "23456789010234",
+					Phone:           "1234567891",
+					LegalNationalID: "AB1234562",
+				},
+				Balance:                  0.0,
+				AllowNagativeBalance:     false,
+				NegativeBalanceThreshold: 0.0,
+			},
+		},
+		{
+			name:           "the organization Owner email address is empty that should be rejected",
+			expectedResult: errors.New("organization's Owner email address can not be empty while creating the organization"),
+			organizationDetails: models.Organization{
+				Details: models.OrganizationDetails{
+					Name:    "Sample Organization 4",
+					Address: "123 Sample Street",
+					Email:   "info4@sample.org",
+					Mobile:  "1234567890124",
+					Phone:   "0987654321",
+				},
+				Owner: models.OrganizationOwner{
+					Type:            "legal",
+					Name:            "Ario2 Ahmadi",
+					Address:         "456 Owner Avenue",
+					Email:           "",
+					Mobile:          "23456789010234",
+					Phone:           "1234567891",
+					LegalNationalID: "AB1234562",
+				},
+				Balance:                  0.0,
+				AllowNagativeBalance:     false,
+				NegativeBalanceThreshold: 0.0,
+			},
+		},
+		{
+			name:           "the organization Owner mobile is empty that should be rejected",
+			expectedResult: errors.New("organization's Owner Mobile can not be empty while creating the organization"),
+			organizationDetails: models.Organization{
+				Details: models.OrganizationDetails{
+					Name:    "Sample Organization 4",
+					Address: "123 Sample Street",
+					Email:   "info4@sample.org",
+					Mobile:  "1234567890124",
+					Phone:   "0987654321",
+				},
+				Owner: models.OrganizationOwner{
+					Type:            "legal",
+					Name:            "Ario2 Ahmadi",
+					Address:         "456 Owner Avenue",
+					Email:           "ario2@example.com",
+					Mobile:          "",
+					Phone:           "1234567891",
+					LegalNationalID: "AB1234562",
+				},
+				Balance:                  0.0,
+				AllowNagativeBalance:     false,
+				NegativeBalanceThreshold: 0.0,
+			},
+		},
+		{
+			name:           "the organization Owner type should not be empty that should be rejected",
+			expectedResult: errors.New("organization's Owner typ should be either individual or legal while creating the organization"),
+			organizationDetails: models.Organization{
+				Details: models.OrganizationDetails{
+					Name:    "Sample Organization 4",
+					Address: "123 Sample Street",
+					Email:   "info4@sample.org",
+					Mobile:  "1234567890124",
+					Phone:   "0987654321",
+				},
+				Owner: models.OrganizationOwner{
+					Type:            "",
+					Name:            "Ario2 Ahmadi",
+					Address:         "456 Owner Avenue",
+					Email:           "ario2@example.com",
+					Mobile:          "23456789010234",
+					Phone:           "1234567891",
+					LegalNationalID: "AB1234562",
+				},
+				Balance:                  0.0,
+				AllowNagativeBalance:     false,
+				NegativeBalanceThreshold: 0.0,
+			},
+		},
+		{
+			name:           "the organization Owner type is not neither 'legal' or 'individual'  that should be rejected",
+			expectedResult: errors.New("organization's Owner typ should be either individual or legal while creating the organization"),
+			organizationDetails: models.Organization{
+				Details: models.OrganizationDetails{
+					Name:    "Sample Organization 4",
+					Address: "123 Sample Street",
+					Email:   "info4@sample.org",
+					Mobile:  "1234567890124",
+					Phone:   "0987654321",
+				},
+				Owner: models.OrganizationOwner{
+					Type:            "ligal",
+					Name:            "Ario2 Ahmadi",
+					Address:         "456 Owner Avenue",
+					Email:           "ario2@example.com",
+					Mobile:          "23456789010234",
+					Phone:           "1234567891",
+					LegalNationalID: "AB1234562",
+				},
+				Balance:                  0.0,
+				AllowNagativeBalance:     false,
+				NegativeBalanceThreshold: 0.0,
+			},
+		},
+		{
+			name:           "the organization Owner national ID is empty that should be rejected",
+			expectedResult: errors.New("organization's Owner Legal National ID can not be empty while creating the organization"),
+			organizationDetails: models.Organization{
+				Details: models.OrganizationDetails{
+					Name:    "Sample Organization 4",
+					Address: "123 Sample Street",
+					Email:   "info4@sample.org",
+					Mobile:  "1234567890124",
+					Phone:   "0987654321",
+				},
+				Owner: models.OrganizationOwner{
+					Type:            "legal",
+					Name:            "Ario2 Ahmadi",
+					Address:         "456 Owner Avenue",
+					Email:           "ario2@example.com",
+					Mobile:          "23456789010234",
+					Phone:           "1234567891",
+					LegalNationalID: "",
+				},
+				Balance:                  0.0,
+				AllowNagativeBalance:     false,
+				NegativeBalanceThreshold: 0.0,
+			},
+		},
 	}
 
 	for _, tc := range testCases {
@@ -432,9 +582,4 @@ func Test(t *testing.T) {
 			}
 		})
 	}
-}
-
-// x
-func TestShorten(t *testing.T) {
-
 }
