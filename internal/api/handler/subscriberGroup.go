@@ -8,10 +8,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetOrganizationGroupList(context *fiber.Ctx) error {
+func GetSubscriberGroupList(context *fiber.Ctx) error {
 	organizationID := context.Params("organization_id")
 
-	organizationGroupList, err := organization.GetOrganizationGroupList(organizationID)
+	organizationGroupList, err := organization.GetSubscriberGroupList(organizationID)
 	if err != nil {
 		errorMessage := models.APIError{
 			Error:   err.Error(),
