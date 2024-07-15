@@ -8,7 +8,7 @@ import (
 	"ospm/config"
 	"ospm/internal/api/routes"
 	"ospm/internal/repository/database/cockroachdb"
-	OSPMLogger "ospm/internal/service/log"
+	OSPMInternalLogger "ospm/internal/service/logger"
 
 	"sync"
 	"time"
@@ -29,10 +29,10 @@ func StartOSPM() {
 
 	// 2.
 	// init the logger
-	OSPMLogger.InitLogger()
+	OSPMInternalLogger.InitLogger()
 
 	configs, _ := json.MarshalIndent(config.OSPM, "", "  ")
-	OSPMLogger.Log.Debugf("%+v", string(configs))
+	OSPMInternalLogger.OSPMLogger.Debugf("%+v", string(configs))
 
 	//3.
 	// init the database
@@ -74,6 +74,6 @@ func StartAPIServer(wg *sync.WaitGroup) {
 
 	routes.Setup(app)
 
-	OSPMLogger.Log.Fatal(app.Listen(config.OSPM.API.GetListenAddress()))
+	OSPMInternalLogger.OSPMLogger.Fatal(app.Listen(config.OSPM.API.GetListenAddress()))
 
 }
