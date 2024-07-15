@@ -6,6 +6,8 @@ import (
 	"ospm/internal/models"
 	"ospm/internal/service/organization"
 
+	_ "ospm/docs/api"
+
 	"github.com/gofiber/fiber/v2"
 )
 

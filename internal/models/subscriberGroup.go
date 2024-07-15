@@ -17,3 +17,21 @@ type SubscriberGroupMinimal struct {
 	ID   string `json:"subscriber_group_id" example:"ed83a2ba-c55c-4297-b2ac-df7b02abdd7a"`
 	Name string `json:"subscriber_group_name" example:"sample group"`
 }
+
+// ######################
+// #	Swagger Models	#
+// ######################
+// The following models are used for swagger documentation
+type SubscriberGroupSwagger struct {
+	ID             string                `json:"subscriber_group_id"`
+	Name           string                `json:"subscriber_group_name"`
+	Description    string                `json:"subscriber_group_description"`
+	Permissions    PermissionSetsSwagger `json:"subscriber_group_permissions"`
+	OrganizationID string                `json:"organization_id"`
+}
+
+type SubscriberGroupCreateResponse struct {
+	Message string `json:"message"`
+	Name    string `json:"name"`
+	Id      string `json:"id"`
+}

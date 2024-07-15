@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"ospm/internal/models"
 	"ospm/internal/repository/database/cockroachdb"
-	OSPMLogger "ospm/internal/service/log"
+	"ospm/internal/service/logger"
 )
 
 // GetSubscriberGroupList get the organization id and returns all groups within the given organiztion
@@ -20,8 +20,8 @@ func GetSubscriberGroupList(organizationsID string) ([]models.SubscriberGroupMin
 		Find(&groupList).Error
 	if err != nil {
 		errorMessage := fmt.Sprintf("failed to load the list of subscriber group for organization id %s, error: %s", organizationsID, err.Error())
-		OSPMLogger.Log.Errorln(errorMessage)
-		return nil, errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return nil, err
 	}
 
 	return groupList, nil
@@ -38,8 +38,8 @@ func GetSubscriberGroupDetail(subscriberGroupID string) (models.SubscriberGroup,
 		Preload("Permissions.SubscriberGroupID").First(subscriberGroupDetail, "id = ? ", subscriberGroupID).Error
 	if err != nil {
 		errorMessage := fmt.Sprintf("failed to load details of given group id %s, error: %+v", subscriberGroupID, err)
-		OSPMLogger.Log.Errorln(errorMessage)
-		return models.SubscriberGroup{}, errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return models.SubscriberGroup{}, err
 	}
 
 	return subscriberGroupDetail, nil
@@ -56,8 +56,8 @@ func DeleteSubscriberGroup(subscriberGroupID string) error {
 		errorMessage := fmt.Sprintf(
 			"failed to load details of given group id %s, error: %+v",
 			subscriberGroupID, err)
-		OSPMLogger.Log.Errorln(errorMessage)
-		return errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return err
 	}
 
 	deletetionTX := cockroachdb.DB.Begin()
@@ -66,7 +66,7 @@ func DeleteSubscriberGroup(subscriberGroupID string) error {
 			errorMessage := fmt.Sprintf(
 				"failed to delete the given group id %s, error: %+v",
 				subscriberGroupID, r)
-			OSPMLogger.Log.Errorln(errorMessage)
+			logger.OSPMLogger.Errorln(errorMessage)
 		}
 	}()
 
@@ -75,8 +75,8 @@ func DeleteSubscriberGroup(subscriberGroupID string) error {
 		errorMessage := fmt.Sprintf(
 			"failed to delete the given group id %s at delete group step, error: %+v",
 			subscriberGroupID, err.Error())
-		OSPMLogger.Log.Errorln(errorMessage)
-		return errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return err
 	}
 
 	err = deletetionTX.Unscoped().Delete(&models.PermissionSets{}).Where("id = ?", permissionSet.ID).Error
@@ -84,8 +84,8 @@ func DeleteSubscriberGroup(subscriberGroupID string) error {
 		errorMessage := fmt.Sprintf(
 			"failed to delete the given group id %s at delete permission set step, error: %+v",
 			subscriberGroupID, err.Error())
-		OSPMLogger.Log.Errorln(errorMessage)
-		return errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return err
 	}
 
 	err = deletetionTX.Unscoped().Delete(&models.OrganizationalLevelPerms{}).Where("permission_set_id = ?", permissionSet.ID).Error
@@ -93,8 +93,8 @@ func DeleteSubscriberGroup(subscriberGroupID string) error {
 		errorMessage := fmt.Sprintf(
 			"failed to delete the given group id %s at delete organizationl level perms step, error: %+v",
 			subscriberGroupID, err.Error())
-		OSPMLogger.Log.Errorln(errorMessage)
-		return errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return err
 	}
 
 	err = deletetionTX.Unscoped().Delete(&models.AccessLevelPerms{}).Where("permission_set_id = ?", permissionSet.ID).Error
@@ -102,8 +102,8 @@ func DeleteSubscriberGroup(subscriberGroupID string) error {
 		errorMessage := fmt.Sprintf(
 			"failed to delete the given group id %s at delete access level perms step, error: %+v",
 			subscriberGroupID, err.Error())
-		OSPMLogger.Log.Errorln(errorMessage)
-		return errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return err
 	}
 
 	err = deletetionTX.Unscoped().Delete(&models.SubscriberLevelPerms{}).Where("permission_set_id = ?", permissionSet.ID).Error
@@ -111,8 +111,8 @@ func DeleteSubscriberGroup(subscriberGroupID string) error {
 		errorMessage := fmt.Sprintf(
 			"failed to delete the given group id %s at delete subscriber level perms step, error: %+v",
 			subscriberGroupID, err.Error())
-		OSPMLogger.Log.Errorln(errorMessage)
-		return errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return err
 	}
 
 	err = deletetionTX.Unscoped().Delete(&models.PaymentLevelPerms{}).Where("permission_set_id = ?", permissionSet.ID).Error
@@ -120,8 +120,8 @@ func DeleteSubscriberGroup(subscriberGroupID string) error {
 		errorMessage := fmt.Sprintf(
 			"failed to delete the given group id %s at delete payment level perms step, error: %+v",
 			subscriberGroupID, err.Error())
-		OSPMLogger.Log.Errorln(errorMessage)
-		return errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return err
 	}
 
 	err = deletetionTX.Unscoped().Delete(&models.ReportLevelPerms{}).Where("permission_set_id = ?", permissionSet.ID).Error
@@ -129,8 +129,8 @@ func DeleteSubscriberGroup(subscriberGroupID string) error {
 		errorMessage := fmt.Sprintf(
 			"failed to delete the given group id %s at delete report level perms step, error: %+v",
 			subscriberGroupID, err.Error())
-		OSPMLogger.Log.Errorln(errorMessage)
-		return errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return err
 	}
 
 	err = deletetionTX.Commit().Error
@@ -138,28 +138,28 @@ func DeleteSubscriberGroup(subscriberGroupID string) error {
 		errorMessage := fmt.Sprintf(
 			"failed to delete the given group id %s at apply step, error: %+v",
 			subscriberGroupID, err.Error())
-		OSPMLogger.Log.Errorln(errorMessage)
-		return errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return err
 	}
 
-	OSPMLogger.Log.Infoln("subscriber group id %s successfully deleted", subscriberGroupID)
+	logger.OSPMLogger.Infoln("subscriber group id %s successfully deleted", subscriberGroupID)
 
 	return nil
 }
 
-func AddNewSubscriberGroup(newSubscriberGroup models.SubscriberGroup) error {
+func AddNewSubscriberGroup(newSubscriberGroup models.SubscriberGroup) (string, error) {
 	err := cockroachdb.DB.Create(&newSubscriberGroup)
 	if err != nil {
 		errorMessage := fmt.Sprintf(
 			"failed to add the new subscriber group  %s at apply step, error: %+v",
 			newSubscriberGroup.Name, err)
-		OSPMLogger.Log.Errorln(errorMessage)
-		return errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return "-1", errors.New(errorMessage)
 	}
 
-	OSPMLogger.Log.Infoln("subscriber group %s successfully added. id: %s", newSubscriberGroup.Name, newSubscriberGroup.ID)
+	logger.OSPMLogger.Infoln("subscriber group %s successfully added. id: %s", newSubscriberGroup.Name, newSubscriberGroup.ID)
 
-	return nil
+	return newSubscriberGroup.ID, nil
 }
 
 func UpdateSubscriber(newSubscriberGroupDetails models.SubscriberGroup, subscriberGroupID string) error {
@@ -175,11 +175,11 @@ func UpdateSubscriber(newSubscriberGroupDetails models.SubscriberGroup, subscrib
 		errorMessage := fmt.Sprintf(
 			"failed to find the given group id %s to update, error: %+v",
 			subscriberGroupID, err.Error())
-		OSPMLogger.Log.Errorln(errorMessage)
-		return errors.New(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return err
 	}
 
-	if oldSubscriberGroupDetail.Name != newSubscriberGroupDetails.Name {
+	if oldSubscriberGroupDetail.Name != newSubscriberGroupDetails.Name && newSubscriberGroupDetails.Name != "" {
 		err = cockroachdb.DB.Model(&models.SubscriberGroup{}).
 			Update("subscriber_group_name", newSubscriberGroupDetails.Name).
 			Where("id = ?", subscriberGroupID).Error
@@ -187,12 +187,12 @@ func UpdateSubscriber(newSubscriberGroupDetails models.SubscriberGroup, subscrib
 			errorMessage := fmt.Sprintf(
 				"failed to update the given group id %s, error: %+v",
 				subscriberGroupID, err.Error())
-			OSPMLogger.Log.Errorln(errorMessage)
-			return errors.New(errorMessage)
+			logger.OSPMLogger.Errorln(errorMessage)
+			return err
 		}
 	}
 
-	if oldSubscriberGroupDetail.Description != newSubscriberGroupDetails.Description {
+	if oldSubscriberGroupDetail.Description != newSubscriberGroupDetails.Description && newSubscriberGroupDetails.Description != "" {
 		err = cockroachdb.DB.Model(&models.SubscriberGroup{}).
 			Update("subscriber_group_description", newSubscriberGroupDetails.Description).
 			Where("id = ?", subscriberGroupID).Error
@@ -200,26 +200,14 @@ func UpdateSubscriber(newSubscriberGroupDetails models.SubscriberGroup, subscrib
 			errorMessage := fmt.Sprintf(
 				"failed to update the given group id %s, error: %+v",
 				subscriberGroupID, err.Error())
-			OSPMLogger.Log.Errorln(errorMessage)
+			logger.OSPMLogger.Errorln(errorMessage)
 			return errors.New(errorMessage)
 		}
 	}
 
-	if oldSubscriberGroupDetail.Description != newSubscriberGroupDetails.Description {
-		err = cockroachdb.DB.Model(&models.SubscriberGroup{}).
-			Update("subscriber_group_description", newSubscriberGroupDetails.Description).
-			Where("id = ?", subscriberGroupID).Error
-		if err != nil {
-			errorMessage := fmt.Sprintf(
-				"failed to update the given group id %s, error: %+v",
-				subscriberGroupID, err.Error())
-			OSPMLogger.Log.Errorln(errorMessage)
-			return errors.New(errorMessage)
-		}
-	}
+	// update perms should be added here
 
-	OSPMLogger.Log.Infoln("subscriber group %s successfully updated. id: %s", newSubscriberGroupDetails.Name, subscriberGroupID)
+	logger.OSPMLogger.Infoln("subscriber group %s successfully updated. id: %s", newSubscriberGroupDetails.Name, subscriberGroupID)
 
 	return nil
-
 }

@@ -7,7 +7,7 @@ import (
 	"ospm/internal/models"
 	"ospm/internal/repository/database/cockroachdb"
 	"ospm/internal/service/complementary"
-	OSPMLogger "ospm/internal/service/log"
+	"ospm/internal/service/logger"
 	"strings"
 )
 
@@ -18,7 +18,7 @@ func List() ([]models.OrganizationShortInfo, error) {
 	result := cockroachdb.DB.Preload("Details").Find(&organizationList)
 	if result.Error != nil {
 		errorMessage := fmt.Sprintf("failed to get list of organization, error: %s", result.Error)
-		OSPMLogger.Log.Errorln(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
 		return nil, errors.New(errorMessage)
 	}
 
@@ -32,7 +32,7 @@ func ListAll() ([]models.OrganizationShortInfo, error) {
 	result := cockroachdb.DB.Unscoped().Preload("Details").Find(&organizationList)
 	if result.Error != nil {
 		errorMessage := fmt.Sprintf("failed to get list of organization, error: %s", result.Error)
-		OSPMLogger.Log.Errorln(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
 		return nil, errors.New(errorMessage)
 	}
 
@@ -70,13 +70,13 @@ func Details(organizationName string, organizationID string) (models.Organizatio
 func New(newOrganization models.Organization) (newOrganzationID string, err error) {
 	if err := DetailsCheck(&newOrganization); err != nil {
 		errorMessage := fmt.Sprintf("the new organization can not be created, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return "", errors.New(errorMessage)
 	}
 
 	if err := cockroachdb.DB.Create(&newOrganization).Error; err != nil {
 		errorMessage := fmt.Sprintf("the new organization can not be created, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return "", errors.New(errorMessage)
 	}
 
@@ -100,7 +100,7 @@ func SoftDelete(organizationID string, organizationName string) error {
 	err := query.First(&organization).Error
 	if err != nil {
 		errorMessage := fmt.Sprintf("failed to find organization to delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -116,14 +116,14 @@ func SoftDelete(organizationID string, organizationName string) error {
 	if err := tx.Select("Details", "Owner").Delete(&organization).Error; err != nil {
 		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to delete organization and related records, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
 	// Commit the transaction
 	if err := tx.Commit().Error; err != nil {
 		errorMessage := fmt.Sprintf("failed to commit transaction, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -147,7 +147,7 @@ func HardDelete(organizationID string, organizationName string) error {
 	err := query.First(&organization).Error
 	if err != nil {
 		errorMessage := fmt.Sprintf("failed to find organization to delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -163,14 +163,14 @@ func HardDelete(organizationID string, organizationName string) error {
 	if err := tx.Unscoped().Select("Details", "Owner").Delete(&organization).Error; err != nil {
 		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to delete organization and related records, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
 	// Commit the transaction
 	if err := tx.Commit().Error; err != nil {
 		errorMessage := fmt.Sprintf("failed to commit transaction, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -193,7 +193,7 @@ func Recover(organizationID string, organizationName string) error {
 	err := query.First(&organization).Error
 	if err != nil {
 		errorMessage := fmt.Sprintf("failed to find organization to delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -204,7 +204,7 @@ func Recover(organizationID string, organizationName string) error {
 	if err := tx.Unscoped().Model(&models.Organization{}).Where("id = ?", organization.ID).Update("deleted_at", nil).Error; err != nil {
 		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -212,7 +212,7 @@ func Recover(organizationID string, organizationName string) error {
 	if err := tx.Unscoped().Model(&models.OrganizationDetails{}).Where("organization_id = ?", organization.ID).Update("deleted_at", nil).Error; err != nil {
 		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -220,7 +220,7 @@ func Recover(organizationID string, organizationName string) error {
 	if err := tx.Unscoped().Model(&models.OrganizationOwner{}).Where("organization_id = ?", organization.ID).Update("deleted_at", nil).Error; err != nil {
 		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -228,7 +228,7 @@ func Recover(organizationID string, organizationName string) error {
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 

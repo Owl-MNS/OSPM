@@ -8,6 +8,14 @@ definitions:
         description: This field determines the detailed information about raise error
         type: string
     type: object
+  models.AccessLevelPermsSwagger:
+    properties:
+      access_level_perms_id:
+        example: ed83a2ba-c55c-4297-b2ac-df7b02abdd7a
+        type: string
+      permission_set_id:
+        type: string
+    type: object
   models.Organization:
     type: object
   models.OrganizationDetailsResponse:
@@ -66,6 +74,80 @@ definitions:
       organization_name:
         description: This field determines the name of the organization
         example: sample organization
+        type: string
+    type: object
+  models.OrganizationalLevelPermsSwagger:
+    properties:
+      organizational_level_perms_id:
+        example: ed83a2ba-c55c-4297-b2ac-df7b02abdd7a
+        type: string
+      permission_set_id:
+        example: ed83a2ba-c55c-4297-b2ac-df7b02abdd7a
+        type: string
+    type: object
+  models.PaymentLevelPermsSwagger:
+    properties:
+      payment_level_perms_id:
+        example: ed83a2ba-c55c-4297-b2ac-df7b02abdd7a
+        type: string
+      permission_set_id:
+        type: string
+    type: object
+  models.PermissionSetsSwagger:
+    properties:
+      access_level_perms:
+        $ref: '#/definitions/models.AccessLevelPermsSwagger'
+      organizational_level_perms:
+        $ref: '#/definitions/models.OrganizationalLevelPermsSwagger'
+      payment_level_perms:
+        $ref: '#/definitions/models.PaymentLevelPermsSwagger'
+      permission_sets_id:
+        example: ed83a2ba-c55c-4297-b2ac-df7b02abdd7a
+        type: string
+      report_level_perms:
+        $ref: '#/definitions/models.ReportLevelPermsSwagger'
+      subscriber_group_id:
+        example: ed83a2ba-c55c-4297-b2ac-df7b02abdd7b
+        type: string
+      subscriber_level_perms:
+        $ref: '#/definitions/models.SubscriberLevelPermsSwagger'
+    type: object
+  models.ReportLevelPermsSwagger:
+    properties:
+      permission_set_id:
+        type: string
+      report_level_perms_id:
+        example: ed83a2ba-c55c-4297-b2ac-df7b02abdd7a
+        type: string
+    type: object
+  models.SubscriberGroupCreateResponse:
+    properties:
+      id:
+        type: string
+      message:
+        type: string
+      name:
+        type: string
+    type: object
+  models.SubscriberGroupSwagger:
+    properties:
+      organization_id:
+        type: string
+      subscriber_group_description:
+        type: string
+      subscriber_group_id:
+        type: string
+      subscriber_group_name:
+        type: string
+      subscriber_group_permissions:
+        $ref: '#/definitions/models.PermissionSetsSwagger'
+    type: object
+  models.SubscriberLevelPermsSwagger:
+    properties:
+      permission_set_id:
+        type: string
+      subscriber_level_perms_id:
+        example: ed83a2ba-c55c-4297-b2ac-df7b02abdd7a
         type: string
     type: object
 info:
@@ -169,6 +251,173 @@ paths:
           schema:
             $ref: '#/definitions/models.APIError'
       summary: Add a new organization
+      tags:
+      - Organization
+  /organization/{organization-id}/subscriber-group:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of all subscriber groups within an organization
+      parameters:
+      - description: Organization ID
+        in: path
+        name: organization-id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            items:
+              $ref: '#/definitions/models.SubscriberGroupSwagger'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: List all Subscriber Groups
+      tags:
+      - Organization
+  /organization/{organization-id}/subscriber-group/:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new subscriber group within an organization
+      parameters:
+      - description: Subscriber Group ID
+        in: path
+        name: organization-id
+        required: true
+        type: integer
+      - description: Subscriber Group Details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.SubscriberGroupSwagger'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully added new subscriber group
+          schema:
+            $ref: '#/definitions/models.SubscriberGroupCreateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Add New Subscriber Group
+      tags:
+      - Organization
+  /organization/{organization-id}/subscriber-group/{subscriber-group-id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a specific subscriber group within an organization by its
+        ID
+      parameters:
+      - description: Subscriber Group ID
+        in: path
+        name: subscriber-group-id
+        required: true
+        type: integer
+      - description: Subscriber Group ID
+        in: path
+        name: organization-id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Delete a Subscriber Group
+      tags:
+      - Organization
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the details of a specific subscriber group within an
+        organization
+      parameters:
+      - description: Organization ID
+        in: path
+        name: organization-id
+        required: true
+        type: integer
+      - description: Subscriber Group ID
+        in: path
+        name: subscriber-group-id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            $ref: '#/definitions/models.SubscriberGroupSwagger'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Get Subscriber Group Detail
+      tags:
+      - Organization
+    patch:
+      consumes:
+      - application/json
+      description: Updates the settings of a specific subscriber group within an organization
+        by its ID
+      parameters:
+      - description: Subscriber Group ID
+        in: path
+        name: subscriber-group-id
+        required: true
+        type: integer
+      - description: Subscriber Group ID
+        in: path
+        name: organization-id
+        required: true
+        type: integer
+      - description: Subscriber Group Settings
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.SubscriberGroupSwagger'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIError'
+      summary: Update Subscriber Group
       tags:
       - Organization
   /organization/recover/profile:
