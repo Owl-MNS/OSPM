@@ -6,6 +6,7 @@ import (
 	"ospm/internal/models"
 	"ospm/internal/service/organization"
 
+	// This line is being used by swagger auto-documenting
 	_ "ospm/docs/api"
 
 	"github.com/gofiber/fiber/v2"

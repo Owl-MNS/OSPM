@@ -209,7 +209,56 @@ const docTemplate = `{
                 }
             }
         },
-        "/organization/{organization-id}/subscriber-group": {
+        "/organizations/profile": {
+            "get": {
+                "description": "Retrieves detailed information about a specific organization identified by its name or ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Get organization profile by name or ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization Name",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "schema": {
+                            "$ref": "#/definitions/models.OrganizationResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Organization Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriber-group/list/{organization_id}": {
             "get": {
                 "description": "Returns a list of all subscriber groups within an organization",
                 "consumes": [
@@ -226,7 +275,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Organization ID",
-                        "name": "organization-id",
+                        "name": "organization_id",
                         "in": "path",
                         "required": true
                     }
@@ -237,7 +286,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.SubscriberGroupSwagger"
+                                "$ref": "#/definitions/models.SubscriberGroupMinimal"
                             }
                         }
                     },
@@ -256,109 +305,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/organization/{organization-id}/subscriber-group/": {
-            "post": {
-                "description": "Adds a new subscriber group within an organization",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Organization"
-                ],
-                "summary": "Add New Subscriber Group",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Subscriber Group ID",
-                        "name": "organization-id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Subscriber Group Details",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.SubscriberGroupSwagger"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Successfully added new subscriber group",
-                        "schema": {
-                            "$ref": "#/definitions/models.SubscriberGroupCreateResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.APIError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.APIError"
-                        }
-                    }
-                }
-            }
-        },
-        "/organization/{organization-id}/subscriber-group/{subscriber-group-id}": {
-            "get": {
-                "description": "Retrieves the details of a specific subscriber group within an organization",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Organization"
-                ],
-                "summary": "Get Subscriber Group Detail",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Organization ID",
-                        "name": "organization-id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Subscriber Group ID",
-                        "name": "subscriber-group-id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "schema": {
-                            "$ref": "#/definitions/models.SubscriberGroupSwagger"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.APIError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.APIError"
-                        }
-                    }
-                }
-            },
+        "/subscriber-group/{subscriber-group-id}": {
             "delete": {
                 "description": "Deletes a specific subscriber group within an organization by its ID",
                 "consumes": [
@@ -438,7 +385,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SubscriberGroupSwagger"
+                            "$ref": "#/definitions/models.SubscriberGroupAPI"
                         }
                     }
                 ],
@@ -455,9 +402,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/organizations/profile": {
-            "get": {
-                "description": "Retrieves detailed information about a specific organization identified by its name or ID.",
+        "/subscriber_group/{organization_id}": {
+            "post": {
+                "description": "Adds a new subscriber group within an organization",
                 "consumes": [
                     "application/json"
                 ],
@@ -467,30 +414,85 @@ const docTemplate = `{
                 "tags": [
                     "Organization"
                 ],
-                "summary": "Get organization profile by name or ID",
+                "summary": "Add New Subscriber Group",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Organization Name",
-                        "name": "name",
-                        "in": "query"
+                        "type": "integer",
+                        "description": "Subscriber Group ID",
+                        "name": "organization_id",
+                        "in": "path",
+                        "required": true
                     },
                     {
-                        "type": "string",
+                        "description": "Subscriber Group Details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SubscriberGroupAPI"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully added new subscriber group",
+                        "schema": {
+                            "$ref": "#/definitions/models.SubscriberGroupCreateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriber_group/{subscriber_group_id}": {
+            "get": {
+                "description": "Retrieves the details of a specific subscriber group within an organization",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Get Subscriber Group Detail",
+                "parameters": [
+                    {
+                        "type": "integer",
                         "description": "Organization ID",
-                        "name": "id",
-                        "in": "query"
+                        "name": "organization_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Subscriber Group ID",
+                        "name": "subscriber_group_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful Response",
+                        "description": "Successful response",
                         "schema": {
-                            "$ref": "#/definitions/models.OrganizationResponse"
+                            "$ref": "#/definitions/models.SubscriberGroupAPI"
                         }
                     },
                     "404": {
-                        "description": "Organization Not Found",
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/models.APIError"
                         }
@@ -515,18 +517,6 @@ const docTemplate = `{
                 },
                 "message": {
                     "description": "This field determines the detailed information about raise error",
-                    "type": "string"
-                }
-            }
-        },
-        "models.AccessLevelPermsSwagger": {
-            "type": "object",
-            "properties": {
-                "access_level_perms_id": {
-                    "type": "string",
-                    "example": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a"
-                },
-                "permission_set_id": {
                     "type": "string"
                 }
             }
@@ -619,68 +609,24 @@ const docTemplate = `{
                 }
             }
         },
-        "models.OrganizationalLevelPermsSwagger": {
+        "models.SubscriberGroupAPI": {
             "type": "object",
             "properties": {
-                "organizational_level_perms_id": {
-                    "type": "string",
-                    "example": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a"
-                },
-                "permission_set_id": {
-                    "type": "string",
-                    "example": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a"
-                }
-            }
-        },
-        "models.PaymentLevelPermsSwagger": {
-            "type": "object",
-            "properties": {
-                "payment_level_perms_id": {
-                    "type": "string",
-                    "example": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a"
-                },
-                "permission_set_id": {
+                "organization_id": {
                     "type": "string"
-                }
-            }
-        },
-        "models.PermissionSetsSwagger": {
-            "type": "object",
-            "properties": {
-                "access_level_perms": {
-                    "$ref": "#/definitions/models.AccessLevelPermsSwagger"
                 },
-                "organizational_level_perms": {
-                    "$ref": "#/definitions/models.OrganizationalLevelPermsSwagger"
-                },
-                "payment_level_perms": {
-                    "$ref": "#/definitions/models.PaymentLevelPermsSwagger"
-                },
-                "permission_sets_id": {
-                    "type": "string",
-                    "example": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a"
-                },
-                "report_level_perms": {
-                    "$ref": "#/definitions/models.ReportLevelPermsSwagger"
+                "subscriber_group_description": {
+                    "type": "string"
                 },
                 "subscriber_group_id": {
-                    "type": "string",
-                    "example": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7b"
-                },
-                "subscriber_level_perms": {
-                    "$ref": "#/definitions/models.SubscriberLevelPermsSwagger"
-                }
-            }
-        },
-        "models.ReportLevelPermsSwagger": {
-            "type": "object",
-            "properties": {
-                "permission_set_id": {
                     "type": "string"
                 },
-                "report_level_perms_id": {
-                    "type": "string",
-                    "example": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a"
+                "subscriber_group_name": {
+                    "type": "string"
+                },
+                "subscriber_group_permissions": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             }
         },
@@ -698,35 +644,16 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SubscriberGroupSwagger": {
+        "models.SubscriberGroupMinimal": {
             "type": "object",
             "properties": {
-                "organization_id": {
-                    "type": "string"
-                },
-                "subscriber_group_description": {
-                    "type": "string"
-                },
                 "subscriber_group_id": {
-                    "type": "string"
-                },
-                "subscriber_group_name": {
-                    "type": "string"
-                },
-                "subscriber_group_permissions": {
-                    "$ref": "#/definitions/models.PermissionSetsSwagger"
-                }
-            }
-        },
-        "models.SubscriberLevelPermsSwagger": {
-            "type": "object",
-            "properties": {
-                "permission_set_id": {
-                    "type": "string"
-                },
-                "subscriber_level_perms_id": {
                     "type": "string",
                     "example": "ed83a2ba-c55c-4297-b2ac-df7b02abdd7a"
+                },
+                "subscriber_group_name": {
+                    "type": "string",
+                    "example": "sample group"
                 }
             }
         }

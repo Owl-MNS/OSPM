@@ -47,12 +47,7 @@ func InitialDB() {
 		&models.SubscriberDetails{},
 		&models.Credentials{},
 		&models.SubscriberGroup{},
-		&models.PermissionSets{},
-		&models.OrganizationalLevelPerms{},
-		&models.AccessLevelPerms{},
-		&models.SubscriberLevelPerms{},
-		&models.PaymentLevelPerms{},
-		&models.ReportLevelPerms{},
+		&models.Permission{},
 		&models.ProductOffering{},
 		&models.ProductOfferingSpecification{})
 	if err != nil {

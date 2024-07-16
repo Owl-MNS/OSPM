@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"ospm/internal/models"
 	"ospm/internal/service/logger"
-	"ospm/internal/service/organization"
+	"ospm/internal/service/subscriberGroup"
 
+	// This line is being used by swagger auto-documenting
 	_ "ospm/docs/api"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,15 +20,15 @@ import (
 // @Tags 		Organization
 // @Accept  	json
 // @Produce  	json
-// @Param 		organization-id path int true "Organization ID"
-// @Success 	200 {array} models.SubscriberGroupSwagger "Successful response"
+// @Param 		organization_id path int true "Organization ID"
+// @Success 	200 {array} models.SubscriberGroupMinimal "Successful response"
 // @Failure 	404 {object} models.APIError "Not Found"
 // @Failure 	500 {object} models.APIError "Internal Server Error"
-// @Router 		/organization/{organization-id}/subscriber-group [get]
+// @Router 		/subscriber-group/list/{organization_id} [get]
 func GetSubscriberGroupList(context *fiber.Ctx) error {
-	organizationID := context.Params("organization-id")
+	organizationID := context.Params("organization_id")
 
-	organizationGroupList, err := organization.GetSubscriberGroupList(organizationID)
+	organizationGroupList, err := subscriberGroup.List(organizationID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			errorMessage := models.APIError{
@@ -63,16 +64,16 @@ func GetSubscriberGroupList(context *fiber.Ctx) error {
 // @Tags 		Organization
 // @Accept  	json
 // @Produce  	json
-// @Param 		organization-id path int true "Organization ID"
-// @Param 		subscriber-group-id path int true "Subscriber Group ID"
-// @Success 	200 {object} models.SubscriberGroupSwagger "Successful response"
+// @Param 		organization_id path int true "Organization ID"
+// @Param 		subscriber_group_id path int true "Subscriber Group ID"
+// @Success 	200 {object} models.SubscriberGroupAPI "Successful response"
 // @Failure 	404 {object} models.APIError "Not Found"
 // @Failure 	500 {object} models.APIError "Internal Server Error"
-// @Router 		/organization/{organization-id}/subscriber-group/{subscriber-group-id} [get]
+// @Router 		/subscriber_group/{subscriber_group_id} [get]
 func GetSubscriberGroupDetail(context *fiber.Ctx) error {
-	subscriberGroupID := context.Params("subscriber-group-id")
+	subscriberGroupID := context.Params("subscriber_group_id")
 
-	groupDetail, err := organization.GetSubscriberGroupDetail(subscriberGroupID)
+	groupDetail, err := subscriberGroup.Detail(subscriberGroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			errorMessage := models.APIError{
@@ -89,7 +90,7 @@ func GetSubscriberGroupDetail(context *fiber.Ctx) error {
 		}
 	}
 
-	jsonDetails, err := json.Marshal(groupDetail)
+	jsonDetails, err := json.Marshal(groupDetail.Beautify())
 	if err != nil {
 		errorMessage := models.APIError{
 			Error:   err.Error(),
@@ -98,7 +99,7 @@ func GetSubscriberGroupDetail(context *fiber.Ctx) error {
 		return context.Status(fiber.ErrInternalServerError.Code).JSON(errorMessage)
 	}
 
-	return context.Status(200).JSON(jsonDetails)
+	return context.Status(200).Send(jsonDetails)
 }
 
 // @Summary 	Add New Subscriber Group
@@ -106,14 +107,15 @@ func GetSubscriberGroupDetail(context *fiber.Ctx) error {
 // @Tags 		Organization
 // @Accept  	json
 // @Produce  	json
-// @Param 		organization-id path int true "Subscriber Group ID"
-// @Param 		body body models.SubscriberGroupSwagger true "Subscriber Group Details"
+// @Param 		organization_id path int true "Subscriber Group ID"
+// @Param 		body body models.SubscriberGroupAPI true "Subscriber Group Details"
 // @Success 	201 {object} models.SubscriberGroupCreateResponse "Successfully added new subscriber group"
 // @Failure 	400 {object} models.APIError "Bad Request"
 // @Failure 	500 {object} models.APIError "Internal Server Error"
-// @Router 		/organization/{organization-id}/subscriber-group/ [post]
+// @Router 		/subscriber_group/{organization_id} [post]
 func AddNewSubscriberGroup(context *fiber.Ctx) error {
 	var newSubscriberGroup models.SubscriberGroup
+
 	err := context.BodyParser(&newSubscriberGroup)
 	if err != nil {
 		errorMessage := models.APIError{
@@ -127,8 +129,13 @@ func AddNewSubscriberGroup(context *fiber.Ctx) error {
 		return context.Status(fiber.StatusBadRequest).JSON(errorMessage)
 	}
 
-	id, err := organization.AddNewSubscriberGroup(newSubscriberGroup)
-	if err != nil || id == "-1" {
+	newSubscriberGroup.OrganizationID = context.Params("organization_id")
+	id, err := subscriberGroup.New(newSubscriberGroup)
+	if err != nil {
+		responseCode := 500
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			responseCode = fiber.ErrBadRequest.Code
+		}
 		errorMessage := models.APIError{
 			Error:   err.Error(),
 			Message: "failed to process the request",
@@ -137,7 +144,7 @@ func AddNewSubscriberGroup(context *fiber.Ctx) error {
 			fmt.Sprintf(
 				"failed to process request. Path: %s, client ip: %s, error: %+v",
 				context.Path(), context.IP(), err))
-		return context.Status(fiber.ErrInternalServerError.Code).JSON(errorMessage)
+		return context.Status(responseCode).JSON(errorMessage)
 	}
 
 	response := models.SubscriberGroupCreateResponse{
@@ -156,10 +163,10 @@ func AddNewSubscriberGroup(context *fiber.Ctx) error {
 // @Produce  	json
 // @Param 		subscriber-group-id path int true "Subscriber Group ID"
 // @Param 		organization-id path int true "Subscriber Group ID"
-// @Param 		body body models.SubscriberGroupSwagger true "Subscriber Group Settings"
+// @Param 		body body models.SubscriberGroupAPI true "Subscriber Group Settings"
 // @Success 	200 "No Content"
 // @Failure 	500 {object} models.APIError "Internal Server Error"
-// @Router 		/organization/{organization-id}/subscriber-group/{subscriber-group-id} [patch]
+// @Router 		/subscriber-group/{subscriber-group-id} [patch]
 func UpdateSubscriberGroup(context *fiber.Ctx) error {
 	var newSubscriberGroupSettings models.SubscriberGroup
 	var responseCode int
@@ -179,7 +186,7 @@ func UpdateSubscriberGroup(context *fiber.Ctx) error {
 		return context.Status(fiber.StatusBadRequest).JSON(errorMessage)
 	}
 
-	err = organization.UpdateSubscriber(newSubscriberGroupSettings, subscriberGroupID)
+	err = subscriberGroup.Update(newSubscriberGroupSettings, subscriberGroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			responseCode = fiber.ErrNotFound.Code
@@ -211,12 +218,12 @@ func UpdateSubscriberGroup(context *fiber.Ctx) error {
 // @Success 	204 "No Content"
 // @Failure 	404 {object} models.APIError "Not Found"
 // @Failure 	500 {object} models.APIError "Internal Server Error"
-// @Router 		/organization/{organization-id}/subscriber-group/{subscriber-group-id} [delete]
+// @Router 		/subscriber-group/{subscriber-group-id} [delete]
 func DeleteSubscriberGroup(context *fiber.Ctx) error {
 	var responseCode int
-	subscriberGroupID := context.Params("subscriber-group-id")
+	subscriberGroupID := context.Params("subscriber_group_id")
 
-	err := organization.DeleteSubscriberGroup(subscriberGroupID)
+	err := subscriberGroup.Delete(subscriberGroupID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			responseCode = fiber.ErrNotFound.Code
