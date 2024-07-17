@@ -8,6 +8,7 @@ import (
 )
 
 func SetupOrganizationRoutes(rg fiber.Router) {
+
 	rg.Get("", middleware.OrganizationPolicyCheck, handler.GetOrganizationList)
 	rg.Get("/profile", middleware.OrganizationPolicyCheck, handler.GetOrganizationProfile)
 	rg.Post("", middleware.OrganizationPolicyCheck, handler.AddNewOrganization)

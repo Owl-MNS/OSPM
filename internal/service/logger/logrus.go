@@ -1,4 +1,4 @@
-package log
+package logger
 
 import (
 	"os"
@@ -7,23 +7,23 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var Log *logrus.Logger
+var OSPMLogger *logrus.Logger
 
 func InitLogger() {
-	Log = logrus.New()
+	OSPMLogger = logrus.New()
 
 	// Set the log level based on an environment variable
 	level, err := logrus.ParseLevel(config.OSPM.Logrus.LogLevel)
 	if err != nil {
 		level = logrus.InfoLevel
 	}
-	Log.SetLevel(level)
+	OSPMLogger.SetLevel(level)
 
 	// Set output to stdout
-	Log.SetOutput(os.Stdout)
+	OSPMLogger.SetOutput(os.Stdout)
 
 	// Set a custom format (JSON is also an option)
-	Log.SetFormatter(&logrus.TextFormatter{
+	OSPMLogger.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})
 }

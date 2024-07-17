@@ -7,7 +7,7 @@ import (
 	"ospm/internal/models"
 	"ospm/internal/repository/database/cockroachdb"
 	"ospm/internal/service/complementary"
-	OSPMLogger "ospm/internal/service/log"
+	"ospm/internal/service/logger"
 	"strings"
 )
 
@@ -18,7 +18,7 @@ func List() ([]models.OrganizationShortInfo, error) {
 	result := cockroachdb.DB.Preload("Details").Find(&organizationList)
 	if result.Error != nil {
 		errorMessage := fmt.Sprintf("failed to get list of organization, error: %s", result.Error)
-		OSPMLogger.Log.Errorln(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
 		return nil, errors.New(errorMessage)
 	}
 
@@ -32,7 +32,7 @@ func ListAll() ([]models.OrganizationShortInfo, error) {
 	result := cockroachdb.DB.Unscoped().Preload("Details").Find(&organizationList)
 	if result.Error != nil {
 		errorMessage := fmt.Sprintf("failed to get list of organization, error: %s", result.Error)
-		OSPMLogger.Log.Errorln(errorMessage)
+		logger.OSPMLogger.Errorln(errorMessage)
 		return nil, errors.New(errorMessage)
 	}
 
@@ -70,13 +70,13 @@ func Details(organizationName string, organizationID string) (models.Organizatio
 func New(newOrganization models.Organization) (newOrganzationID string, err error) {
 	if err := DetailsCheck(&newOrganization); err != nil {
 		errorMessage := fmt.Sprintf("the new organization can not be created, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return "", errors.New(errorMessage)
 	}
 
 	if err := cockroachdb.DB.Create(&newOrganization).Error; err != nil {
 		errorMessage := fmt.Sprintf("the new organization can not be created, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return "", errors.New(errorMessage)
 	}
 
@@ -100,7 +100,7 @@ func SoftDelete(organizationID string, organizationName string) error {
 	err := query.First(&organization).Error
 	if err != nil {
 		errorMessage := fmt.Sprintf("failed to find organization to delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -116,14 +116,14 @@ func SoftDelete(organizationID string, organizationName string) error {
 	if err := tx.Select("Details", "Owner").Delete(&organization).Error; err != nil {
 		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to delete organization and related records, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
 	// Commit the transaction
 	if err := tx.Commit().Error; err != nil {
 		errorMessage := fmt.Sprintf("failed to commit transaction, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -147,7 +147,7 @@ func HardDelete(organizationID string, organizationName string) error {
 	err := query.First(&organization).Error
 	if err != nil {
 		errorMessage := fmt.Sprintf("failed to find organization to delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -163,14 +163,14 @@ func HardDelete(organizationID string, organizationName string) error {
 	if err := tx.Unscoped().Select("Details", "Owner").Delete(&organization).Error; err != nil {
 		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to delete organization and related records, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
 	// Commit the transaction
 	if err := tx.Commit().Error; err != nil {
 		errorMessage := fmt.Sprintf("failed to commit transaction, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -193,7 +193,7 @@ func Recover(organizationID string, organizationName string) error {
 	err := query.First(&organization).Error
 	if err != nil {
 		errorMessage := fmt.Sprintf("failed to find organization to delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -204,7 +204,7 @@ func Recover(organizationID string, organizationName string) error {
 	if err := tx.Unscoped().Model(&models.Organization{}).Where("id = ?", organization.ID).Update("deleted_at", nil).Error; err != nil {
 		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -212,7 +212,7 @@ func Recover(organizationID string, organizationName string) error {
 	if err := tx.Unscoped().Model(&models.OrganizationDetails{}).Where("organization_id = ?", organization.ID).Update("deleted_at", nil).Error; err != nil {
 		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -220,7 +220,7 @@ func Recover(organizationID string, organizationName string) error {
 	if err := tx.Unscoped().Model(&models.OrganizationOwner{}).Where("organization_id = ?", organization.ID).Update("deleted_at", nil).Error; err != nil {
 		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -228,7 +228,7 @@ func Recover(organizationID string, organizationName string) error {
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to recover organization from soft delete, error: %+v", err)
-		OSPMLogger.Log.Error(errorMessage)
+		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
 
@@ -252,62 +252,62 @@ func Shorten(organizations []models.Organization) []models.OrganizationShortInfo
 // DetailsCheck checks the given new organization details an validates the given values
 // Since the given values have met the creation policies, the new organization can be created
 // by returning nil as error otherwise the error determines what is wrong with the new given information
-func DetailsCheck(newOrganization *models.Organization) error {
+func DetailsCheck(organizationDetails *models.Organization) error {
 	var err error
 
-	if newOrganization.Balance != 0 {
+	if organizationDetails.Balance != 0 {
 		errorMessage := fmt.Sprintf(
 			"organization balance can not accept any values but 0 while creating the organization. given value is: %f",
-			newOrganization.Balance)
+			organizationDetails.Balance)
 		err = errors.New(errorMessage)
 	}
 
-	if newOrganization.AllowNagativeBalance {
+	if organizationDetails.AllowNagativeBalance {
 		errorMessage := fmt.Sprintf(
 			"organization AllowNagativeBalance can not be true while creating the organization. given value is: %v",
-			newOrganization.AllowNagativeBalance)
+			organizationDetails.AllowNagativeBalance)
 		err = errors.New(errorMessage)
 	}
 
-	if newOrganization.NegativeBalanceThreshold != 0 {
+	if organizationDetails.NegativeBalanceThreshold != 0 {
 		errorMessage := fmt.Sprintf(
 			"organization NegativeBalanceThreshold can not accept any values but 0 while creating the organization. given value is: %f",
-			newOrganization.NegativeBalanceThreshold)
+			organizationDetails.NegativeBalanceThreshold)
 		err = errors.New(errorMessage)
 	}
 
-	if newOrganization.Details.Name == "" {
+	if organizationDetails.Details.Name == "" {
 		errorMessage := fmt.Sprintf(
 			"organization Name can not be empty while creating the organization. given value is: %s",
-			newOrganization.Details.Name)
+			organizationDetails.Details.Name)
 		err = errors.New(errorMessage)
 	}
 
-	if newOrganization.Owner.Email == "" {
+	if organizationDetails.Owner.Email == "" {
 		errorMessage := fmt.Sprintf(
 			"organization's Owner email address can not be empty while creating the organization. given value is: %s",
-			newOrganization.Owner.Email)
+			organizationDetails.Owner.Email)
 		err = errors.New(errorMessage)
 	}
 
-	if newOrganization.Owner.Mobile == "" {
+	if organizationDetails.Owner.Mobile == "" {
 		errorMessage := fmt.Sprintf(
 			"organization's Owner Mobile can not be empty while creating the organization. given value is: %s",
-			newOrganization.Owner.Mobile)
+			organizationDetails.Owner.Mobile)
 		err = errors.New(errorMessage)
 	}
 
-	if !(newOrganization.Owner.Type == "legal" || newOrganization.Owner.Type == "individual") {
+	if !(organizationDetails.Owner.Type == "legal" || organizationDetails.Owner.Type == "individual") {
 		errorMessage := fmt.Sprintf(
 			"organization's Owner typ should be either individual or legal while creating the organization. given value is: %s",
-			newOrganization.Owner.Type)
+			organizationDetails.Owner.Type)
 		err = errors.New(errorMessage)
 	}
 
-	if newOrganization.Owner.LegalNationalID == "" {
+	if organizationDetails.Owner.LegalNationalID == "" {
 		errorMessage := fmt.Sprintf(
 			"organization's Owner Legal National ID can not be empty while creating the organization. given value is: %s",
-			newOrganization.Owner.LegalNationalID)
+			organizationDetails.Owner.LegalNationalID)
 		err = errors.New(errorMessage)
 	}
 
@@ -365,7 +365,7 @@ func ClientIPCanSoftDeleteOrganization(clientIP string) bool {
 func ClientIPCanHardDeleteOrganization(clientIP string) bool {
 
 	// Check if the client's IP is in the allowed list or ranges
-	for _, allowedIP := range strings.Split(config.OSPM.ClientPolicies.OrganizationSoftDeleteWhiteListedIPs, ",") {
+	for _, allowedIP := range strings.Split(config.OSPM.ClientPolicies.OrganizationHardDeleteWhiteListedIPs, ",") {
 		if complementary.IPRangeCotains(clientIP, allowedIP) {
 			return true
 		}

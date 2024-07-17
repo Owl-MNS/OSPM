@@ -8,7 +8,7 @@ install-test-utility:
 	fi
 
 test-critical: install-test-utility
-	${GOPATH}/bin/gotestsum --format=testname -- -v --tags="critical" ./...
+	${GOPATH}/bin/gotestsum --format=testname -- -cover -v --tags="critical" ./...
 
 test-all: test-critical
 
