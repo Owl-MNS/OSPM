@@ -122,6 +122,7 @@ func SoftDelete(organizationID string, organizationName string) error {
 
 	// Commit the transaction
 	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to commit transaction, error: %+v", err)
 		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)
@@ -169,6 +170,7 @@ func HardDelete(organizationID string, organizationName string) error {
 
 	// Commit the transaction
 	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
 		errorMessage := fmt.Sprintf("failed to commit transaction, error: %+v", err)
 		logger.OSPMLogger.Error(errorMessage)
 		return errors.New(errorMessage)

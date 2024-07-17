@@ -43,6 +43,7 @@ func Delete(subscriberGroupID string) error {
 	deletetionTX := cockroachdb.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
+			deletetionTX.Rollback()
 			errorMessage := fmt.Sprintf(
 				"failed to delete the given group id %s, error: %+v",
 				subscriberGroupID, r)
@@ -52,6 +53,7 @@ func Delete(subscriberGroupID string) error {
 
 	err := deletetionTX.Unscoped().Where("id = ?", subscriberGroupID).Delete(&models.SubscriberGroup{}).Error
 	if err != nil {
+		deletetionTX.Rollback()
 		errorMessage := fmt.Sprintf(
 			"failed to delete the given group id %s at delete group step, error: %+v",
 			subscriberGroupID, err.Error())
@@ -61,6 +63,7 @@ func Delete(subscriberGroupID string) error {
 
 	err = deletetionTX.Unscoped().Where("subscriber_group_id = ?", subscriberGroupID).Delete(&models.Permission{}).Error
 	if err != nil {
+		deletetionTX.Rollback()
 		errorMessage := fmt.Sprintf(
 			"failed to delete the given group id %s at delete permission set step, error: %+v",
 			subscriberGroupID, err.Error())
@@ -70,6 +73,7 @@ func Delete(subscriberGroupID string) error {
 
 	err = deletetionTX.Commit().Error
 	if err != nil {
+		deletetionTX.Rollback()
 		errorMessage := fmt.Sprintf(
 			"failed to delete the given group id %s at apply step, error: %+v",
 			subscriberGroupID, err.Error())
@@ -86,6 +90,7 @@ func New(newSubscriberGroup models.SubscriberGroup) (string, error) {
 	createTX := cockroachdb.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
+			createTX.Rollback()
 			errorMessage := fmt.Sprintf(
 				"failed to add the new subscriber group  %s at apply step, error: %+v",
 				newSubscriberGroup.Name, r)
@@ -95,6 +100,7 @@ func New(newSubscriberGroup models.SubscriberGroup) (string, error) {
 
 	err := createTX.Create(&newSubscriberGroup).Error
 	if err != nil {
+		createTX.Rollback()
 		errorMessage := fmt.Sprintf(
 			"failed to add the new subscriber group  %s at apply step, error: %+v",
 			newSubscriberGroup.Name, err)
@@ -104,11 +110,11 @@ func New(newSubscriberGroup models.SubscriberGroup) (string, error) {
 
 	err = createTX.Commit().Error
 	if err != nil {
+		createTX.Rollback()
 		errorMessage := fmt.Sprintf(
 			"failed to add the new subscriber group  %s at apply step, error: %+v",
 			newSubscriberGroup.Name, err)
 		logger.OSPMLogger.Errorln(errorMessage)
-		createTX.Rollback()
 		return "-1", err
 	}
 
