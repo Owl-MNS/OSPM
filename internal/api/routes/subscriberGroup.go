@@ -12,5 +12,5 @@ func SetupSubscriberGroupRoutes(rg fiber.Router) {
 	rg.Get("/:subscriber_group_id", handler.GetSubscriberGroupDetail)
 	rg.Post("/:organization_id", handler.AddNewSubscriberGroup)
 	rg.Delete("/:subscriber_group_id", handler.DeleteSubscriberGroup)
-	rg.Patch("/:subscriber-group-id", handler.UpdateSubscriberGroup)
+	rg.Patch("/:subscriber_group_id", handler.UpdateSubscriberGroup)
 }

@@ -108,13 +108,13 @@ func GetSubscriberGroupDetail(context *fiber.Ctx) error {
 // @Accept  	json
 // @Produce  	json
 // @Param 		organization_id path int true "Subscriber Group ID"
-// @Param 		body body models.SubscriberGroupAPI true "Subscriber Group Details"
+// @Param 		body body models.CreateUpdateSubscriberGroupAPI true "Subscriber Group Details"
 // @Success 	201 {object} models.SubscriberGroupCreateResponse "Successfully added new subscriber group"
 // @Failure 	400 {object} models.APIError "Bad Request"
 // @Failure 	500 {object} models.APIError "Internal Server Error"
 // @Router 		/subscriber_group/{organization_id} [post]
 func AddNewSubscriberGroup(context *fiber.Ctx) error {
-	var newSubscriberGroup models.SubscriberGroupAPI
+	var newSubscriberGroup models.CreateUpdateSubscriberGroupAPI
 
 	err := context.BodyParser(&newSubscriberGroup)
 	if err != nil {
@@ -161,17 +161,16 @@ func AddNewSubscriberGroup(context *fiber.Ctx) error {
 // @Tags 		Organization
 // @Accept  	json
 // @Produce  	json
-// @Param 		subscriber-group-id path int true "Subscriber Group ID"
-// @Param 		organization-id path int true "Subscriber Group ID"
-// @Param 		body body models.SubscriberGroupAPI true "Subscriber Group Settings"
+// @Param 		subscriber_group_id path int true "Subscriber Group ID"
+// @Param 		body body models.CreateUpdateSubscriberGroupAPI true "Subscriber Group Settings"
 // @Success 	200 "No Content"
 // @Failure 	500 {object} models.APIError "Internal Server Error"
-// @Router 		/subscriber-group/{subscriber-group-id} [patch]
+// @Router 		/subscriber-group/{subscriber_group_id} [patch]
 func UpdateSubscriberGroup(context *fiber.Ctx) error {
-	var newSubscriberGroupSettings models.SubscriberGroup
+	var newSubscriberGroupSettings models.CreateUpdateSubscriberGroupAPI
 	var responseCode int
 
-	subscriberGroupID := context.Params("subscriber-group-id")
+	subscriberGroupID := context.Params("subscriber_group_id")
 
 	err := context.BodyParser(&newSubscriberGroupSettings)
 	if err != nil {

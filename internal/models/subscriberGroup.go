@@ -31,7 +31,7 @@ func (sg *SubscriberGroup) Beautify() SubscriberGroupAPI {
 }
 
 // Absorb gets an object of SubscriberGroupAPI and loads its content into the current object's fields!
-func (sg *SubscriberGroup) Absorb(apiVersion SubscriberGroupAPI) {
+func (sg *SubscriberGroup) Absorb(apiVersion CreateUpdateSubscriberGroupAPI) {
 	sg.Name = apiVersion.Name
 	sg.Description = apiVersion.Description
 	sg.OrganizationID = apiVersion.OrganizationID
@@ -74,4 +74,11 @@ type SubscriberGroupMinimal struct {
 
 type AddSubscriberGroupAPI struct {
 	PermissionName string `json:""`
+}
+
+type CreateUpdateSubscriberGroupAPI struct {
+	Name           string                     `json:"subscriber_group_name"`
+	Description    string                     `json:"subscriber_group_description"`
+	Permissions    map[string][]PermissionAPI `json:"subscriber_group_permissions"` // This field gets a list of permission categorized per permission category
+	OrganizationID string                     `json:"organization_id"`
 }

@@ -1,11 +1,11 @@
 package subscriberGroup
 
 import (
-	"errors"
 	"fmt"
 	"ospm/internal/models"
 	"ospm/internal/repository/database/cockroachdb"
 	"ospm/internal/service/logger"
+	"reflect"
 )
 
 // GetSubscriberGroupList get the organization id and returns all groups within the given organiztion
@@ -126,7 +126,7 @@ func New(newSubscriberGroup models.SubscriberGroup) (string, error) {
 
 // NewByAPI gets the new subscriber configurations based on a modified version of the standard
 // model which has been used to ease the AddNewSubscriberGroup API Call
-func NewByAPI(newSubscriberGroup models.SubscriberGroupAPI) (string, error) {
+func NewByAPI(newSubscriberGroup models.CreateUpdateSubscriberGroupAPI) (string, error) {
 
 	//converting modified subscriber group used by API client to the standard version
 	standardSubscriberGroup := models.SubscriberGroup{}
@@ -168,52 +168,112 @@ func NewByAPI(newSubscriberGroup models.SubscriberGroupAPI) (string, error) {
 	return standardSubscriberGroup.ID, nil
 }
 
-func Update(newSubscriberGroupDetails models.SubscriberGroup, subscriberGroupID string) error {
-	var oldSubscriberGroupDetail models.SubscriberGroup
-	err := cockroachdb.DB.Preload("Permissions").
-		Preload("Permissions.OrganizationLevelPerms").
-		Preload("Permissions.AccessLevelPerms").
-		Preload("Permissions.SubscriberLevelPerms").
-		Preload("Permissions.PaymentLevelPerms").
-		Preload("Permissions.ReportLevelPerms").
-		Preload("Permissions.SubscriberGroupID").First(&oldSubscriberGroupDetail).Where("id = ? ", subscriberGroupID).Error
+func Update(newSubscriberGroupDetails models.CreateUpdateSubscriberGroupAPI, subscriberGroupID string) error {
+
+	currentSubscriberGroup, err := Detail(subscriberGroupID)
 	if err != nil {
-		errorMessage := fmt.Sprintf(
-			"failed to find the given group id %s to update, error: %+v",
+		errorMessage := fmt.Sprintf("failed to load the subscriber group settings for the given id: %s, error: %+v",
 			subscriberGroupID, err.Error())
 		logger.OSPMLogger.Errorln(errorMessage)
 		return err
 	}
 
-	if oldSubscriberGroupDetail.Name != newSubscriberGroupDetails.Name && newSubscriberGroupDetails.Name != "" {
-		err = cockroachdb.DB.Model(&models.SubscriberGroup{}).
-			Update("subscriber_group_name", newSubscriberGroupDetails.Name).
-			Where("id = ?", subscriberGroupID).Error
+	updateTX := cockroachdb.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			errorMessage := fmt.Sprintf("failed to update the subscriber group for the given id: %s, error: %+v",
+				subscriberGroupID, r)
+			logger.OSPMLogger.Errorln(errorMessage)
+			updateTX.Rollback()
+		}
+	}()
+
+	if currentSubscriberGroup.Name != newSubscriberGroupDetails.Name {
+		err = updateTX.Unscoped().Model(&models.SubscriberGroup{}).Where("id = ?", subscriberGroupID).Update("subscriber_group_name",
+			newSubscriberGroupDetails.Name).Error
 		if err != nil {
-			errorMessage := fmt.Sprintf(
-				"failed to update the given group id %s, error: %+v",
+			errorMessage := fmt.Sprintf("failed to update the subscriber group name at update step for the given id: %s, error: %+v",
 				subscriberGroupID, err.Error())
 			logger.OSPMLogger.Errorln(errorMessage)
+			updateTX.Rollback()
 			return err
 		}
 	}
 
-	if oldSubscriberGroupDetail.Description != newSubscriberGroupDetails.Description && newSubscriberGroupDetails.Description != "" {
-		err = cockroachdb.DB.Model(&models.SubscriberGroup{}).
-			Update("subscriber_group_description", newSubscriberGroupDetails.Description).
-			Where("id = ?", subscriberGroupID).Error
+	if currentSubscriberGroup.Description != newSubscriberGroupDetails.Description {
+		err = updateTX.Unscoped().Model(&models.SubscriberGroup{}).
+			Where("id = ?", subscriberGroupID).
+			Update("description", newSubscriberGroupDetails.Description).Error
 		if err != nil {
-			errorMessage := fmt.Sprintf(
-				"failed to update the given group id %s, error: %+v",
+			errorMessage := fmt.Sprintf("failed to update the subscriber group name at update step for the given id: %s, error: %+v",
 				subscriberGroupID, err.Error())
 			logger.OSPMLogger.Errorln(errorMessage)
-			return errors.New(errorMessage)
+			updateTX.Rollback()
+			return err
 		}
 	}
 
-	// update perms should be added here
+	for permCategory, permSettings := range newSubscriberGroupDetails.Permissions {
+		for _, perm := range permSettings {
+			updateCandidatePerm := models.Permission{
+				PermissionCategory: permCategory,
+				PermissionName:     perm.PermissionName,
+				PermissionValue:    perm.PermissionValue,
+			}
 
-	logger.OSPMLogger.Infoln("subscriber group %s successfully updated. id: %s", newSubscriberGroupDetails.Name, subscriberGroupID)
+			err = nil
+			switch action(updateCandidatePerm, currentSubscriberGroup.Permissions) {
+			case "update":
+				err = updateTX.Unscoped().Model(&models.Permission{}).
+					Where("subscriber_group_id = ? AND permission_name = ? AND permission_category = ?",
+						subscriberGroupID,
+						updateCandidatePerm.PermissionName,
+						updateCandidatePerm.PermissionCategory).
+					Update("permission_value", updateCandidatePerm.PermissionValue).Error
+			case "create":
+				updateCandidatePerm.SubscriberGroupID = subscriberGroupID
+				err = updateTX.Create(&updateCandidatePerm).Error
+			default:
+				logger.OSPMLogger.Infoln("permission already exists. ignored. permission: %+v, Subscriber Group ID: %s", updateCandidatePerm, subscriberGroupID)
+			}
+
+			if err != nil {
+				errorMessage := fmt.Sprintf(
+					"failed to update the subscriber group permission at update step for the given id: %s, permission to update: %+v error: %+v",
+					subscriberGroupID, updateCandidatePerm, err.Error())
+				logger.OSPMLogger.Errorln(errorMessage)
+				updateTX.Rollback()
+				return err
+			}
+		}
+	}
+
+	err = updateTX.Commit().Error
+	if err != nil {
+		errorMessage := fmt.Sprintf("failed to update the subscriber group name at commit step for the given id: %s, error: %+v",
+			subscriberGroupID, err.Error())
+		logger.OSPMLogger.Errorln(errorMessage)
+		updateTX.Rollback()
+		return err
+	}
 
 	return nil
+}
+
+// action gets a permission config and checks it among a list of permissions and returns:
+// ignore: if the permission list has the exact permission
+// update: if the permission list has a permission with the same settings of givem permission but value
+// create: if the permission list has not permission equal to the givem permission
+func action(permToCheck models.Permission, PermsList []models.Permission) string {
+	for _, perm := range PermsList {
+		if reflect.DeepEqual(perm, permToCheck) {
+			return "ignore"
+		} else if perm.PermissionName == permToCheck.PermissionName &&
+			perm.PermissionCategory == permToCheck.PermissionCategory &&
+			perm.PermissionValue != permToCheck.PermissionValue {
+			return "update"
+		}
+	}
+
+	return "create"
 }

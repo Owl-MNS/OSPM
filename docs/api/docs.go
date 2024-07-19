@@ -351,7 +351,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/subscriber-group/{subscriber_group_id}": {
             "patch": {
                 "description": "Updates the settings of a specific subscriber group within an organization by its ID",
                 "consumes": [
@@ -368,14 +370,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Subscriber Group ID",
-                        "name": "subscriber-group-id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Subscriber Group ID",
-                        "name": "organization-id",
+                        "name": "subscriber_group_id",
                         "in": "path",
                         "required": true
                     },
@@ -385,7 +380,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SubscriberGroupAPI"
+                            "$ref": "#/definitions/models.CreateUpdateSubscriberGroupAPI"
                         }
                     }
                 ],
@@ -429,7 +424,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SubscriberGroupAPI"
+                            "$ref": "#/definitions/models.CreateUpdateSubscriberGroupAPI"
                         }
                     }
                 ],
@@ -518,6 +513,30 @@ const docTemplate = `{
                 "message": {
                     "description": "This field determines the detailed information about raise error",
                     "type": "string"
+                }
+            }
+        },
+        "models.CreateUpdateSubscriberGroupAPI": {
+            "type": "object",
+            "properties": {
+                "organization_id": {
+                    "type": "string"
+                },
+                "subscriber_group_description": {
+                    "type": "string"
+                },
+                "subscriber_group_name": {
+                    "type": "string"
+                },
+                "subscriber_group_permissions": {
+                    "description": "This field gets a list of permission categorized per permission category",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/models.PermissionAPI"
+                        }
+                    }
                 }
             }
         },

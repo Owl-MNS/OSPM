@@ -8,6 +8,23 @@ definitions:
         description: This field determines the detailed information about raise error
         type: string
     type: object
+  models.CreateUpdateSubscriberGroupAPI:
+    properties:
+      organization_id:
+        type: string
+      subscriber_group_description:
+        type: string
+      subscriber_group_name:
+        type: string
+      subscriber_group_permissions:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/models.PermissionAPI'
+          type: array
+        description: This field gets a list of permission categorized per permission
+          category
+        type: object
+    type: object
   models.Organization:
     type: object
   models.OrganizationDetailsResponse:
@@ -315,6 +332,7 @@ paths:
       summary: Delete a Subscriber Group
       tags:
       - Organization
+  /subscriber-group/{subscriber_group_id}:
     patch:
       consumes:
       - application/json
@@ -323,12 +341,7 @@ paths:
       parameters:
       - description: Subscriber Group ID
         in: path
-        name: subscriber-group-id
-        required: true
-        type: integer
-      - description: Subscriber Group ID
-        in: path
-        name: organization-id
+        name: subscriber_group_id
         required: true
         type: integer
       - description: Subscriber Group Settings
@@ -336,7 +349,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/models.SubscriberGroupAPI'
+          $ref: '#/definitions/models.CreateUpdateSubscriberGroupAPI'
       produces:
       - application/json
       responses:
@@ -396,7 +409,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/models.SubscriberGroupAPI'
+          $ref: '#/definitions/models.CreateUpdateSubscriberGroupAPI'
       produces:
       - application/json
       responses:
