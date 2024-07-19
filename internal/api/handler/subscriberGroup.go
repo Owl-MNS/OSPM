@@ -114,7 +114,7 @@ func GetSubscriberGroupDetail(context *fiber.Ctx) error {
 // @Failure 	500 {object} models.APIError "Internal Server Error"
 // @Router 		/subscriber_group/{organization_id} [post]
 func AddNewSubscriberGroup(context *fiber.Ctx) error {
-	var newSubscriberGroup models.SubscriberGroup
+	var newSubscriberGroup models.SubscriberGroupAPI
 
 	err := context.BodyParser(&newSubscriberGroup)
 	if err != nil {
@@ -130,7 +130,7 @@ func AddNewSubscriberGroup(context *fiber.Ctx) error {
 	}
 
 	newSubscriberGroup.OrganizationID = context.Params("organization_id")
-	id, err := subscriberGroup.New(newSubscriberGroup)
+	id, err := subscriberGroup.NewByAPI(newSubscriberGroup)
 	if err != nil {
 		responseCode := 500
 		if errors.Is(err, gorm.ErrDuplicatedKey) {

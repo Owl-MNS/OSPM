@@ -68,6 +68,15 @@ definitions:
         example: sample organization
         type: string
     type: object
+  models.PermissionAPI:
+    properties:
+      permission:
+        example: CAN_VIEW_PAYMENT_HISTORY
+        type: string
+      value:
+        example: "yes"
+        type: string
+    type: object
   models.SubscriberGroupAPI:
     properties:
       organization_id:
@@ -79,7 +88,12 @@ definitions:
       subscriber_group_name:
         type: string
       subscriber_group_permissions:
-        additionalProperties: true
+        additionalProperties:
+          items:
+            $ref: '#/definitions/models.PermissionAPI'
+          type: array
+        description: This field gets a list of permission categorized per permission
+          category
         type: object
     type: object
   models.SubscriberGroupCreateResponse:

@@ -609,6 +609,19 @@ const docTemplate = `{
                 }
             }
         },
+        "models.PermissionAPI": {
+            "type": "object",
+            "properties": {
+                "permission": {
+                    "type": "string",
+                    "example": "CAN_VIEW_PAYMENT_HISTORY"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "yes"
+                }
+            }
+        },
         "models.SubscriberGroupAPI": {
             "type": "object",
             "properties": {
@@ -625,8 +638,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "subscriber_group_permissions": {
+                    "description": "This field gets a list of permission categorized per permission category",
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/models.PermissionAPI"
+                        }
+                    }
                 }
             }
         },

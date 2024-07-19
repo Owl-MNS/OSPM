@@ -2,7 +2,7 @@
     "clientName": "Thunder Client",
     "collectionName": "ospm",
     "collectionId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
-    "dateExported": "2024-07-10T00:24:56.062Z",
+    "dateExported": "2024-07-19T01:19:42.525Z",
     "version": "1.2",
     "folders": [
         {
@@ -11,9 +11,33 @@
             "containerId": "",
             "created": "2024-07-06T20:49:32.247Z",
             "sortNum": 10000
+        },
+        {
+            "_id": "e7fc105b-024f-4b64-85a8-de5d6d9b8b07",
+            "name": "subscriberGroup",
+            "containerId": "",
+            "created": "2024-07-13T22:31:56.379Z",
+            "sortNum": 20000
         }
     ],
     "requests": [
+        {
+            "_id": "48d908e2-57f1-4f22-b8f9-55611b10bd6c",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "e7fc105b-024f-4b64-85a8-de5d6d9b8b07",
+            "name": "GetSubscriberGroupList",
+            "url": "http://127.0.0.1:9898/subscriber_group/list/0bc8016c-c4bf-4809-b8d4-ce7eb1739721",
+            "method": "GET",
+            "sortNum": 10000,
+            "created": "2024-07-13T22:32:03.465Z",
+            "modified": "2024-07-16T20:39:59.643Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ]
+        },
         {
             "_id": "cd29e27a-214a-4777-8d25-56f0d3679ac3",
             "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
@@ -39,6 +63,45 @@
             ]
         },
         {
+            "_id": "b0b80743-e7c3-418f-ae64-862cc6d64f49",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "e7fc105b-024f-4b64-85a8-de5d6d9b8b07",
+            "name": "AddNewSubscriberGroup",
+            "url": "http://127.0.0.1:9898/subscriber_group/9d24dd2e-b3be-4345-960f-042aaad8ab95",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2024-07-16T17:04:12.678Z",
+            "modified": "2024-07-19T01:17:28.814Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"subscriber_group_name\": \"Example Group7\",\n  \"subscriber_group_description\": \"This is an example subscriber group.\",\n  \"subscriber_group_permissions\": {\n    \"REPORT_LEVEL\": [\n      {\n        \"permission\": \"CAN_VIEW_PAYMENT_HISTORY\",\n        \"value\": \"true\"\n      },\n      {\n        \"permission\": \"CAN_VIEW_LOGIN_HISTORY\",\n        \"value\": \"true\"\n      }\n    ],\n    \"ACCESS_LEVEL\": [\n      {\n        \"permission\": \"CAN_CALL_API\",\n        \"value\": \"true\"\n      },\n      {\n        \"permission\": \"CAN_SEND_SMS\",\n        \"value\": \"true\"\n      }\n    ]\n  }\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "135638c9-6c11-44ca-8faf-860771fe6ff2",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "e7fc105b-024f-4b64-85a8-de5d6d9b8b07",
+            "name": "GetSubscriberGroupDetail",
+            "url": "http://127.0.0.1:9898/subscriber_group/0f8bc543-37b7-4437-b40a-5b831ca58378",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2024-07-16T21:29:17.101Z",
+            "modified": "2024-07-19T01:17:58.371Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ]
+        },
+        {
             "_id": "796adf99-7782-4fa8-951b-fa76c04f1b90",
             "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
             "containerId": "37fd6682-5c40-4a90-bf3c-74537f86d1fa",
@@ -54,6 +117,23 @@
                     "name": "name",
                     "value": "Sample%20Organization%202",
                     "isPath": false
+                }
+            ]
+        },
+        {
+            "_id": "1f6b9f64-37c2-4a75-970f-c76a7488290d",
+            "colId": "f481a9d8-9c40-4e36-844b-eb6fca8a1259",
+            "containerId": "e7fc105b-024f-4b64-85a8-de5d6d9b8b07",
+            "name": "DeleteSubscriberGroup",
+            "url": "http://127.0.0.1:9898/subscriber_group/d4d50261-7759-4530-9a89-f10b2f7880d7",
+            "method": "DELETE",
+            "sortNum": 30000,
+            "created": "2024-07-16T22:35:55.416Z",
+            "modified": "2024-07-16T22:44:23.945Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
                 }
             ]
         },
@@ -214,5 +294,5 @@
             }
         }
     ],
-    "ref": "f_g7vHUfaOT0qRTulndPg7Moh8mvvMQeKKsMJ591h1uHn39uM_qwFbd9PqUtIfPB5OcyD3XubcZUwJ8snP8NmA"
+    "ref": "f_g7vHUfaOT0qRTulndPg0vCG_aVR_zLZ0iiygCKK5qWv-SudjN5NctVpQ1rXCQaCmqAYR-AZMflJ-y4QCN0AA"
 }

@@ -16,7 +16,6 @@ type Permission struct {
 // ##########################
 // The following models are used for swagger documentation
 type PermissionAPI struct {
-	PermissionName     string `json:"permission_name" example:"CAN_VIEW_PAYMENT_HISTORY"`
-	PermissionValue    string `json:"permission_value" example:"yes"`
-	PermissionCategory string `json:"permission_category" example:"REPORT_LEVEL"`
+	PermissionName  string `json:"permission" example:"CAN_VIEW_PAYMENT_HISTORY"`
+	PermissionValue string `json:"value" example:"yes"`
 }

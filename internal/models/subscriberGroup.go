@@ -17,23 +17,34 @@ func (sg *SubscriberGroup) Beautify() SubscriberGroupAPI {
 		Name:           sg.Name,
 		Description:    sg.Description,
 		OrganizationID: sg.OrganizationID,
-		Permissions:    map[string]interface{}{},
+		Permissions:    map[string][]PermissionAPI{},
 	}
 
 	for _, perm := range sg.Permissions {
-		beautified.Permissions[perm.PermissionCategory] = map[string]string{
-			"permission": perm.PermissionName,
-			"value":      perm.PermissionValue,
-		}
-
-		// beautified.Permissions = append(beautified.Permissions, PermissionAPI{
-		// 	PermissionName:     perm.PermissionName,
-		// 	PermissionValue:    perm.PermissionValue,
-		// 	PermissionCategory: perm.PermissionCategory,
-		// })
+		beautified.Permissions[perm.PermissionCategory] = append(beautified.Permissions[perm.PermissionCategory], PermissionAPI{
+			PermissionName:  perm.PermissionName,
+			PermissionValue: perm.PermissionValue,
+		})
 	}
 
 	return beautified
+}
+
+// Absorb gets an object of SubscriberGroupAPI and loads its content into the current object's fields!
+func (sg *SubscriberGroup) Absorb(apiVersion SubscriberGroupAPI) {
+	sg.Name = apiVersion.Name
+	sg.Description = apiVersion.Description
+	sg.OrganizationID = apiVersion.OrganizationID
+
+	for permCategory, permSettings := range apiVersion.Permissions {
+		for _, perm := range permSettings {
+			newPerm := Permission{}
+			newPerm.PermissionCategory = permCategory
+			newPerm.PermissionName = perm.PermissionName
+			newPerm.PermissionValue = perm.PermissionValue
+			sg.Permissions = append(sg.Permissions, newPerm)
+		}
+	}
 }
 
 // ##########################
@@ -41,11 +52,11 @@ func (sg *SubscriberGroup) Beautify() SubscriberGroupAPI {
 // ##########################
 // The following models are used for swagger documentation
 type SubscriberGroupAPI struct {
-	ID             string                 `json:"subscriber_group_id"`
-	Name           string                 `json:"subscriber_group_name"`
-	Description    string                 `json:"subscriber_group_description"`
-	Permissions    map[string]interface{} `json:"subscriber_group_permissions"`
-	OrganizationID string                 `json:"organization_id"`
+	ID             string                     `json:"subscriber_group_id"`
+	Name           string                     `json:"subscriber_group_name"`
+	Description    string                     `json:"subscriber_group_description"`
+	Permissions    map[string][]PermissionAPI `json:"subscriber_group_permissions"` // This field gets a list of permission categorized per permission category
+	OrganizationID string                     `json:"organization_id"`
 }
 
 type SubscriberGroupCreateResponse struct {
@@ -59,4 +70,8 @@ type SubscriberGroupCreateResponse struct {
 type SubscriberGroupMinimal struct {
 	ID   string `json:"subscriber_group_id" example:"ed83a2ba-c55c-4297-b2ac-df7b02abdd7a"`
 	Name string `json:"subscriber_group_name" example:"sample group"`
+}
+
+type AddSubscriberGroupAPI struct {
+	PermissionName string `json:""`
 }

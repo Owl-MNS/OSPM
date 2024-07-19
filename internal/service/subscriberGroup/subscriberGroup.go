@@ -86,6 +86,7 @@ func Delete(subscriberGroupID string) error {
 	return nil
 }
 
+// New gets the new subscriber group configuration based on standard subscriber group model and adds it
 func New(newSubscriberGroup models.SubscriberGroup) (string, error) {
 	createTX := cockroachdb.DB.Begin()
 	defer func() {
@@ -121,6 +122,50 @@ func New(newSubscriberGroup models.SubscriberGroup) (string, error) {
 	logger.OSPMLogger.Infoln("subscriber group %s successfully added. id: %s", newSubscriberGroup.Name, newSubscriberGroup.ID)
 
 	return newSubscriberGroup.ID, nil
+}
+
+// NewByAPI gets the new subscriber configurations based on a modified version of the standard
+// model which has been used to ease the AddNewSubscriberGroup API Call
+func NewByAPI(newSubscriberGroup models.SubscriberGroupAPI) (string, error) {
+
+	//converting modified subscriber group used by API client to the standard version
+	standardSubscriberGroup := models.SubscriberGroup{}
+	standardSubscriberGroup.Absorb(newSubscriberGroup)
+
+	createTX := cockroachdb.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			createTX.Rollback()
+			errorMessage := fmt.Sprintf(
+				"failed to add the new subscriber group  %s at apply step, error: %+v",
+				newSubscriberGroup.Name, r)
+			logger.OSPMLogger.Errorln(errorMessage)
+		}
+	}()
+
+	err := createTX.Create(&standardSubscriberGroup).Error
+	if err != nil {
+		createTX.Rollback()
+		errorMessage := fmt.Sprintf(
+			"failed to add the new subscriber group  %s at apply step, error: %+v",
+			newSubscriberGroup.Name, err)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return "-1", err
+	}
+
+	err = createTX.Commit().Error
+	if err != nil {
+		createTX.Rollback()
+		errorMessage := fmt.Sprintf(
+			"failed to add the new subscriber group  %s at apply step, error: %+v",
+			newSubscriberGroup.Name, err)
+		logger.OSPMLogger.Errorln(errorMessage)
+		return "-1", err
+	}
+
+	logger.OSPMLogger.Infoln("subscriber group %s successfully added. id: %s", standardSubscriberGroup.Name, standardSubscriberGroup.ID)
+
+	return standardSubscriberGroup.ID, nil
 }
 
 func Update(newSubscriberGroupDetails models.SubscriberGroup, subscriberGroupID string) error {
