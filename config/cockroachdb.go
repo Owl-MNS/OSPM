@@ -4,21 +4,31 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
 )
 
 type CockRoachDBConfig struct {
-	DBName         string
-	Username       string
-	Password       string
-	Address        string
-	Port           string
-	SSLMode        string
-	ClientKeyPath  string
-	ClientCertPath string
-	CACertPath     string
+	DBName                    string
+	Username                  string
+	Password                  string
+	Address                   string
+	Port                      string
+	SSLMode                   string
+	ClientKeyPath             string
+	ClientCertPath            string
+	CACertPath                string
+	MaxIdleConnection         int
+	MaxIdleConnectionLifeTime int
+	MaxOpenConnection         int
+	MaxConnectionLifeTime     int
 }
 
+// OSPM_COCKROACHDB_MAX_IDLE_CONNECTIONS=20
+// OSPM_COCKROACHDB_MAX_OPEN_CONNECTIONS=100
+// OSPM_COCKROACHDB_MAX_CONNECTION_LIFE_TIME=1800
+
 func LoadCockroachDBConfigs() *CockRoachDBConfig {
+	var err error
 	loadedConfig := &CockRoachDBConfig{}
 
 	loadedConfig.DBName = os.Getenv("OSPM_COCKROACHDB_DB_NAME")
@@ -62,6 +72,26 @@ func LoadCockroachDBConfigs() *CockRoachDBConfig {
 	loadedConfig.CACertPath = os.Getenv("OSPM_COCKROACHDB_SSL_CA_CERT_PATH")
 	if loadedConfig.CACertPath == "" {
 		loadedConfig.CACertPath = "/etc/roachCerts/ca.crt"
+	}
+
+	loadedConfig.MaxIdleConnection, err = strconv.Atoi(os.Getenv("OSPM_COCKROACHDB_MAX_IDLE_CONNECTIONS"))
+	if err != nil {
+		loadedConfig.MaxIdleConnection = 20
+	}
+
+	loadedConfig.MaxIdleConnectionLifeTime, err = strconv.Atoi(os.Getenv("OSPM_COCKROACHDB_MAX_IDLE_CONNECTIONS_LIFE_TIME"))
+	if err != nil {
+		loadedConfig.MaxIdleConnection = 1800
+	}
+
+	loadedConfig.MaxOpenConnection, err = strconv.Atoi(os.Getenv("OSPM_COCKROACHDB_MAX_OPEN_CONNECTIONS"))
+	if err != nil {
+		loadedConfig.MaxIdleConnection = 100
+	}
+
+	loadedConfig.MaxConnectionLifeTime, err = strconv.Atoi(os.Getenv("OSPM_COCKROACHDB_MAX_CONNECTION_LIFE_TIME"))
+	if err != nil {
+		loadedConfig.MaxIdleConnection = 1800
 	}
 
 	return loadedConfig

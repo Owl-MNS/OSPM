@@ -4,6 +4,7 @@ import (
 	"log"
 	"ospm/config"
 	"ospm/internal/models"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,7 +15,7 @@ var DB *gorm.DB
 func InitialDB() {
 	var err error
 
-	DB, err = gorm.Open(postgres.Open(config.OSPM.RDMS.DSN()), &gorm.Config{})
+	DB, err = gorm.Open(postgres.Open(config.OSPM.RDBMS.DSN()), &gorm.Config{})
 	if err != nil {
 		log.Fatal("failed to connect to database: ", err)
 	}
@@ -24,6 +25,11 @@ func InitialDB() {
 	if err != nil {
 		log.Fatal("failed to get generic database object: ", err)
 	}
+
+	sqlDB.SetMaxIdleConns(config.OSPM.RDBMS.MaxIdleConnection)
+	sqlDB.SetConnMaxIdleTime(time.Duration(config.OSPM.RDBMS.MaxIdleConnectionLifeTime * time.Now().Second()))
+	sqlDB.SetMaxOpenConns(config.OSPM.RDBMS.MaxOpenConnection)
+	sqlDB.SetConnMaxLifetime(time.Duration(config.OSPM.RDBMS.MaxConnectionLifeTime))
 
 	err = sqlDB.Ping()
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 type OSPMConfig struct {
 	API            *APISetting
 	Logrus         *LogrusConfig
-	RDMS           *CockRoachDBConfig
+	RDBMS          *CockRoachDBConfig
 	ClientPolicies *ClientPolicy
 }
 
@@ -33,7 +33,7 @@ func LoadOSPMConfigs() {
 	OSPM = &OSPMConfig{
 		API:            LoadAPISettings(),
 		Logrus:         LoadLogrusConfigs(),
-		RDMS:           LoadCockroachDBConfigs(),
+		RDBMS:          LoadCockroachDBConfigs(),
 		ClientPolicies: LoadClientPolicies(),
 	}
 }
